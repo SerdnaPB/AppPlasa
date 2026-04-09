@@ -48,6 +48,24 @@
         border-radius: 18px;
         box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
       }
+      .top-message {
+        position: fixed;
+        top: 18px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: none;
+        width: min(720px, 92vw);
+        padding: 14px 16px;
+        text-align: center;
+        font-size: clamp(16px, 3.8vw, 22px);
+        font-weight: 800;
+        color: #f5f3ff;
+        background: rgba(124, 58, 237, 0.22);
+        border: 1px solid rgba(196, 181, 253, 0.35);
+        border-radius: 16px;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+      }
       .hint {
         opacity: 0.85;
         text-align: center;
@@ -57,21 +75,24 @@
     </style>
   </head>
   <body>
+    <div id="msg" class="top-message">Todo va a salir bien 💜</div>
     <div class="wrap">
-      <button id="btn">Abrasito de Andres ⭐</button>
+      <button id="btn">Abrasito de Andrés ⭐</button>
       <img id="flork" src="./flork.png" alt="Flork" />
-      <div class="hint">Al pulsar el botón aparece la imagen <code>flork.png</code>.</div>
     </div>
 
     <script>
       const btn = document.getElementById("btn");
       const img = document.getElementById("flork");
+      const msg = document.getElementById("msg");
 
       btn.addEventListener("click", () => {
+        msg.style.display = "block";
         img.style.display = "block";
         img.scrollIntoView({ behavior: "smooth", block: "center" });
       });
     </script>
   </body>
+</html>
 </html>
 
