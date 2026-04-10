@@ -48,6 +48,28 @@
         border-radius: 18px;
         box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
       }
+      .countdown {
+        display: none;
+        width: min(560px, 92vw);
+        text-align: center;
+        color: #f5f3ff;
+        background: rgba(30, 41, 59, 0.5);
+        border: 1px solid rgba(148, 163, 184, 0.35);
+        border-radius: 16px;
+        padding: 16px 14px;
+        box-shadow: 0 14px 36px rgba(0, 0, 0, 0.3);
+      }
+      .countdown-title {
+        margin: 0 0 8px;
+        font-size: clamp(16px, 3.2vw, 24px);
+        font-weight: 800;
+      }
+      .countdown-value {
+        margin: 0;
+        font-size: clamp(20px, 4.2vw, 34px);
+        font-weight: 900;
+        letter-spacing: 0.5px;
+      }
       .top-message {
         position: fixed;
         top: 18px;
@@ -75,22 +97,56 @@
     </style>
   </head>
   <body>
-    <div id="msg" class="top-message">Todo va a salir bien 💜🧸</div>
+    <div id="msg" class="top-message">Que pases un precioso(como tú) día💜🧸</div>
     <div class="wrap">
-      <button id="btn">Abrasito de Andrés ⭐</button>
-      <img id="flork" src="./flork.png" alt="Flork" />
+      <button id="btn">Clica para recibir un Abrasito⭐</button>
+      <img id="flork" src="./Florkyflor.png" alt="Flork" />
+      <div id="countdown" class="countdown">
+        <p class="countdown-title">Tiempo para vernos (como máx)</p>
+        <p id="countdownValue" class="countdown-value">42d 00h 00m 00s</p>
+      </div>
     </div>
 
     <script>
       const btn = document.getElementById("btn");
       const img = document.getElementById("flork");
       const msg = document.getElementById("msg");
+      const countdown = document.getElementById("countdown");
+      const countdownValue = document.getElementById("countdownValue");
+      let countdownTimer = null;
+
+      function formatRemaining(ms) {
+        const totalSeconds = Math.floor(ms / 1000);
+        const days = Math.floor(totalSeconds / 86400);
+        const hours = Math.floor((totalSeconds % 86400) / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+        return `${days}d ${String(hours).padStart(2, "0")}h ${String(
+          minutes
+        ).padStart(2, "0")}m ${String(seconds).padStart(2, "0")}s`;
+      }
 
       btn.addEventListener("click", () => {
         msg.style.display = "block";
         img.style.display = "block";
+        countdown.style.display = "block";
         btn.style.display = "none";
-        img.scrollIntoView({ behavior: "smooth", block: "center" });
+
+        const endTime = Date.now() + 42 * 24 * 60 * 60 * 1000;
+        countdownValue.textContent = formatRemaining(endTime - Date.now());
+
+        if (countdownTimer) clearInterval(countdownTimer);
+        countdownTimer = setInterval(() => {
+          const remaining = endTime - Date.now();
+          if (remaining <= 0) {
+            countdownValue.textContent = "0d 00h 00m 00s";
+            clearInterval(countdownTimer);
+            return;
+          }
+          countdownValue.textContent = formatRemaining(remaining);
+        }, 1000);
+
+        countdown.scrollIntoView({ behavior: "smooth", block: "center" });
       });
     </script>
   </body>
