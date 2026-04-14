@@ -284,7 +284,7 @@
       type="button"
       aria-label="Abrir pensamientos"
     >
-      📝
+      📝 Pens.
     </button>
     <div id="menuBackdrop" class="menu-backdrop"></div>
     <div id="thoughtBackdrop" class="menu-backdrop"></div>
@@ -369,22 +369,31 @@
         thoughtBackdrop.classList.remove("open");
       }
 
-      menuToggle.addEventListener("click", (event) => {
+      function toggleMovieMenu(event) {
         event.stopPropagation();
+        event.preventDefault();
         if (movieMenu.classList.contains("open")) {
           closeMovieMenu();
         } else {
           openMovieMenu();
         }
-      });
-      thoughtToggle.addEventListener("click", (event) => {
+      }
+
+      function toggleThoughtMenu(event) {
         event.stopPropagation();
+        event.preventDefault();
         if (thoughtMenu.classList.contains("open")) {
           closeThoughtMenu();
         } else {
           openThoughtMenu();
         }
-      });
+      }
+
+      menuToggle.addEventListener("click", toggleMovieMenu);
+      thoughtToggle.addEventListener("click", toggleThoughtMenu);
+      // Respaldo para algunos navegadores móviles donde el primer click falla.
+      menuToggle.addEventListener("touchend", toggleMovieMenu, { passive: false });
+      thoughtToggle.addEventListener("touchend", toggleThoughtMenu, { passive: false });
 
       menuBackdrop.addEventListener("click", (event) => {
         event.stopPropagation();
@@ -577,6 +586,9 @@
           addThoughtBtn.click();
         }
       });
+      // Fuerza estado inicial consistente en primera carga.
+      closeMovieMenu();
+      closeThoughtMenu();
       loadMovies();
       loadThoughts();
 
@@ -617,6 +629,7 @@
     </script>
   </body>
 </html>
+
 
 
 
