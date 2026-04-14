@@ -238,6 +238,8 @@
       const movieList = document.getElementById("movieList");
       let countdownTimer = null;
       let movieId = 0;
+      const MOVIES_STORAGE_KEY = "peliculasParaVer";
+      let movies = [];
 
       menuToggle.addEventListener("click", () => {
         movieMenu.classList.toggle("open");
@@ -258,30 +260,76 @@
         }
       });
 
+      function saveMovies() {
+        localStorage.setItem(MOVIES_STORAGE_KEY, JSON.stringify(movies));
+      }
+
+      function renderMovies() {
+        movieList.innerHTML = "";
+
+        movies.forEach((movie) => {
+          const item = document.createElement("li");
+          item.className = `movie-item${movie.seen ? " seen" : ""}`;
+          item.innerHTML = `
+            <span class="movie-title"></span>
+            <label class="tick-label">
+              <input type="checkbox" />
+              Visto
+            </label>
+          `;
+
+          const titleEl = item.querySelector(".movie-title");
+          const checkbox = item.querySelector('input[type="checkbox"]');
+          titleEl.textContent = movie.title;
+          checkbox.id = `movieSeen${movie.id}`;
+          checkbox.checked = movie.seen;
+          checkbox.addEventListener("change", () => {
+            movie.seen = checkbox.checked;
+            item.classList.toggle("seen", checkbox.checked);
+            saveMovies();
+          });
+
+          movieList.appendChild(item);
+        });
+      }
+
       function addMovie(title) {
         const cleanTitle = title.trim();
         if (!cleanTitle) return;
 
         movieId += 1;
-        const item = document.createElement("li");
-        item.className = "movie-item";
-        item.innerHTML = `
-          <span class="movie-title"></span>
-          <label class="tick-label">
-            <input type="checkbox" />
-            Visto
-          </label>
-        `;
-
-        const titleEl = item.querySelector(".movie-title");
-        const checkbox = item.querySelector('input[type="checkbox"]');
-        titleEl.textContent = cleanTitle;
-        checkbox.id = `movieSeen${movieId}`;
-        checkbox.addEventListener("change", () => {
-          item.classList.toggle("seen", checkbox.checked);
+        movies.push({
+          id: movieId,
+          title: cleanTitle,
+          seen: false,
         });
+        saveMovies();
+        renderMovies();
+      }
 
-        movieList.appendChild(item);
+      function loadMovies() {
+        try {
+          const raw = localStorage.getItem(MOVIES_STORAGE_KEY);
+          if (!raw) return;
+          const parsed = JSON.parse(raw);
+          if (!Array.isArray(parsed)) return;
+
+          movies = parsed
+            .filter((movie) => movie && typeof movie.title === "string")
+            .map((movie) => ({
+              id: Number(movie.id) || 0,
+              title: movie.title.trim(),
+              seen: Boolean(movie.seen),
+            }))
+            .filter((movie) => movie.title.length > 0);
+
+          movieId = movies.reduce((maxId, movie) => Math.max(maxId, movie.id), 0);
+          renderMovies();
+        } catch (_error) {
+          movies = [];
+          movieId = 0;
+          renderMovies();
+        }
       }
 
       addMovieBtn.addEventListener("click", () => {
@@ -295,6 +343,7 @@
           addMovieBtn.click();
         }
       });
+      loadMovies();
 
       function formatRemaining(ms) {
         const totalSeconds = Math.floor(ms / 1000);
