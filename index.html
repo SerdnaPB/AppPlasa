@@ -349,36 +349,63 @@
       let movies = [];
       let thoughts = [];
 
-      menuToggle.addEventListener("click", () => {
-        movieMenu.classList.toggle("open");
-        menuBackdrop.classList.toggle("open");
-      });
-      thoughtToggle.addEventListener("click", () => {
-        thoughtMenu.classList.toggle("open");
-        thoughtBackdrop.classList.toggle("open");
-      });
+      function openMovieMenu() {
+        movieMenu.classList.add("open");
+        menuBackdrop.classList.add("open");
+      }
 
-      menuBackdrop.addEventListener("click", () => {
+      function closeMovieMenu() {
         movieMenu.classList.remove("open");
         menuBackdrop.classList.remove("open");
-      });
-      thoughtBackdrop.addEventListener("click", () => {
+      }
+
+      function openThoughtMenu() {
+        thoughtMenu.classList.add("open");
+        thoughtBackdrop.classList.add("open");
+      }
+
+      function closeThoughtMenu() {
         thoughtMenu.classList.remove("open");
         thoughtBackdrop.classList.remove("open");
+      }
+
+      menuToggle.addEventListener("click", (event) => {
+        event.stopPropagation();
+        if (movieMenu.classList.contains("open")) {
+          closeMovieMenu();
+        } else {
+          openMovieMenu();
+        }
+      });
+      thoughtToggle.addEventListener("click", (event) => {
+        event.stopPropagation();
+        if (thoughtMenu.classList.contains("open")) {
+          closeThoughtMenu();
+        } else {
+          openThoughtMenu();
+        }
+      });
+
+      menuBackdrop.addEventListener("click", (event) => {
+        event.stopPropagation();
+        closeMovieMenu();
+      });
+      thoughtBackdrop.addEventListener("click", (event) => {
+        event.stopPropagation();
+        closeThoughtMenu();
       });
 
       document.addEventListener("click", (event) => {
-        const clickedInsideMenu = movieMenu.contains(event.target);
-        const clickedToggle = menuToggle.contains(event.target);
-        const clickedInsideThoughts = thoughtMenu.contains(event.target);
-        const clickedThoughtToggle = thoughtToggle.contains(event.target);
+        const target = event.target;
+        const clickedInsideMenu = movieMenu.contains(target);
+        const clickedToggle = menuToggle.contains(target);
+        const clickedInsideThoughts = thoughtMenu.contains(target);
+        const clickedThoughtToggle = thoughtToggle.contains(target);
         if (!clickedInsideMenu && !clickedToggle) {
-          movieMenu.classList.remove("open");
-          menuBackdrop.classList.remove("open");
+          closeMovieMenu();
         }
         if (!clickedInsideThoughts && !clickedThoughtToggle) {
-          thoughtMenu.classList.remove("open");
-          thoughtBackdrop.classList.remove("open");
+          closeThoughtMenu();
         }
       });
 
