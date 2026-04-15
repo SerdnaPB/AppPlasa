@@ -271,25 +271,20 @@
         font-size: clamp(16px, 3vw, 22px);
         font-weight: 800;
       }
-      .mood-row {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
+      .mood-slider-wrap {
+        display: grid;
         gap: 8px;
       }
-      .mood-chip {
-        border: 0;
-        border-radius: 999px;
-        padding: 8px 12px;
-        font-size: 16px;
-        font-weight: 700;
-        cursor: pointer;
-        background: rgba(240, 253, 250, 0.92);
-        color: #065f46;
+      .mood-slider {
+        width: 100%;
+        accent-color: #34d399;
       }
-      .mood-chip.active {
-        background: #34d399;
-        color: #022c22;
+      .mood-scale {
+        display: flex;
+        justify-content: space-between;
+        font-size: 13px;
+        font-weight: 700;
+        opacity: 0.95;
       }
       .mood-selected {
         margin: 8px 0 0;
@@ -425,11 +420,20 @@
       <button id="btn">Clica para recibir un Abrasito⭐</button>
       <div class="mood-card">
         <p class="mood-title">¿Cómo te sientes hoy?</p>
-        <div id="moodRow" class="mood-row">
-          <button class="mood-chip" data-mood="Feliz 😊">Feliz 😊</button>
-          <button class="mood-chip" data-mood="Tranquilo/a 😌">Tranquilo/a 😌</button>
-          <button class="mood-chip" data-mood="Nostálgico/a 💜">Nostálgico/a 💜</button>
-          <button class="mood-chip" data-mood="Con energía ⚡">Con energía ⚡</button>
+        <div class="mood-slider-wrap">
+          <input
+            id="moodSlider"
+            class="mood-slider"
+            type="range"
+            min="0"
+            max="100"
+            step="1"
+            value="50"
+          />
+          <div class="mood-scale">
+            <span>Triste 😔</span>
+            <span>Feliz 😊</span>
+          </div>
         </div>
         <p id="moodSelected" class="mood-selected">Ánimo actual: Sin elegir</p>
       </div>
@@ -461,7 +465,7 @@
       const thoughtInput = document.getElementById("thoughtInput");
       const addThoughtBtn = document.getElementById("addThoughtBtn");
       const thoughtList = document.getElementById("thoughtList");
-      const moodRow = document.getElementById("moodRow");
+      const moodSlider = document.getElementById("moodSlider");
       const moodSelected = document.getElementById("moodSelected");
       const syncStatus = document.getElementById("syncStatus");
       let countdownTimer = null;
@@ -746,12 +750,23 @@
         randomMovieMessage.textContent = `La película elegida es ${pick.title}!`;
       }
 
-      function applyMood(mood) {
-        const chips = moodRow.querySelectorAll(".mood-chip");
-        chips.forEach((chip) => {
-          chip.classList.toggle("active", chip.dataset.mood === mood);
-        });
-        moodSelected.textContent = `Ánimo actual: ${mood || "Sin elegir"}`;
+      function moodLabelFromValue(rawValue) {
+        const value = Number(rawValue);
+        if (value <= 20) return "Muy triste 😢";
+        if (value <= 40) return "Triste 😔";
+        if (value <= 60) return "Neutral 😐";
+        if (value <= 80) return "Contento/a 🙂";
+        return "Muy feliz 😄";
+      }
+
+      function applyMood(rawValue) {
+        const normalized = Number.isFinite(Number(rawValue))
+          ? Number(rawValue)
+          : 50;
+        moodSlider.value = String(normalized);
+        moodSelected.textContent = `Ánimo actual: ${moodLabelFromValue(
+          normalized
+        )} (${normalized}/100)`;
       }
 
       async function addThought(text) {
@@ -846,12 +861,10 @@
           await loadThoughts();
         }
       });
-      moodRow.addEventListener("click", (event) => {
-        const chip = event.target.closest(".mood-chip");
-        if (!chip) return;
-        const mood = chip.dataset.mood || "";
-        localStorage.setItem(MOOD_STORAGE_KEY, mood);
-        applyMood(mood);
+      moodSlider.addEventListener("input", () => {
+        const moodValue = Number(moodSlider.value);
+        localStorage.setItem(MOOD_STORAGE_KEY, String(moodValue));
+        applyMood(moodValue);
       });
 
       function subscribeRealtime() {
@@ -886,8 +899,8 @@
         await loadMovies();
         await loadThoughts();
         subscribeRealtime();
-        const storedMood = localStorage.getItem(MOOD_STORAGE_KEY) || "";
-        applyMood(storedMood);
+        const storedMood = localStorage.getItem(MOOD_STORAGE_KEY);
+        applyMood(storedMood ?? "50");
         showStatus(
           `Conectado a Supabase (${MOVIES_TABLE} / ${THOUGHTS_TABLE}).`
         );
