@@ -572,8 +572,9 @@
       async function loadMovies() {
         const { data, error } = await supabaseClient
           .from(MOVIES_TABLE)
-          .select("id, title, seen")
-          .order("id", { ascending: true });
+          .select("id, title, seen, created_at")
+          .order("created_at", { ascending: false, nullsFirst: false })
+          .order("id", { ascending: false });
         if (error) {
           showStatus(`Error cargando películas: ${error.message}`, true);
           console.error("Error al cargar películas:", error.message);
@@ -594,7 +595,8 @@
         const { data, error } = await supabaseClient
           .from(THOUGHTS_TABLE)
           .select("id, text, created_at")
-          .order("id", { ascending: true });
+          .order("created_at", { ascending: false, nullsFirst: false })
+          .order("id", { ascending: false });
         if (error) {
           showStatus(`Error cargando pensamientos: ${error.message}`, true);
           console.error("Error al cargar pensamientos:", error.message);
@@ -718,6 +720,7 @@
     </script>
   </body>
 </html>
+
 
 
 
