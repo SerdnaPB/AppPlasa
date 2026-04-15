@@ -146,12 +146,32 @@
       }
       .movie-item {
         display: grid;
-        grid-template-columns: 1fr auto;
+        grid-template-columns: 1fr auto auto;
         gap: 8px;
         align-items: center;
         background: rgba(51, 65, 85, 0.45);
         border-radius: 10px;
         padding: 8px 10px;
+      }
+      .entry-actions {
+        display: inline-flex;
+        gap: 6px;
+      }
+      .entry-actions button {
+        border: 0;
+        border-radius: 8px;
+        padding: 6px 8px;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .btn-edit {
+        background: #93c5fd;
+        color: #082f49;
+      }
+      .btn-delete {
+        background: #fca5a5;
+        color: #7f1d1d;
       }
       .movie-item.seen .movie-title {
         text-decoration: line-through;
@@ -206,10 +226,75 @@
         line-height: 1.35;
         word-break: break-word;
       }
+      .thought-item-top {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 8px;
+        align-items: start;
+      }
       .thought-item-meta {
         margin-top: 6px;
         font-size: 12px;
         opacity: 0.8;
+      }
+      .movie-random {
+        margin-top: 12px;
+        border-top: 1px solid rgba(167, 139, 250, 0.35);
+        padding-top: 10px;
+      }
+      .movie-random button {
+        width: 100%;
+        border: 0;
+        border-radius: 10px;
+        padding: 10px 12px;
+        font-weight: 800;
+        cursor: pointer;
+        background: #67e8f9;
+        color: #164e63;
+      }
+      .movie-random-message {
+        margin: 8px 0 0;
+        font-size: 14px;
+        font-weight: 700;
+      }
+      .mood-card {
+        width: min(560px, 92vw);
+        border-radius: 16px;
+        padding: 12px 14px;
+        background: rgba(236, 253, 245, 0.18);
+        border: 1px solid rgba(110, 231, 183, 0.45);
+        color: #ecfeff;
+        text-align: center;
+      }
+      .mood-title {
+        margin: 0 0 8px;
+        font-size: clamp(16px, 3vw, 22px);
+        font-weight: 800;
+      }
+      .mood-row {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+      }
+      .mood-chip {
+        border: 0;
+        border-radius: 999px;
+        padding: 8px 12px;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        background: rgba(240, 253, 250, 0.92);
+        color: #065f46;
+      }
+      .mood-chip.active {
+        background: #34d399;
+        color: #022c22;
+      }
+      .mood-selected {
+        margin: 8px 0 0;
+        font-size: 14px;
+        font-weight: 700;
       }
       .sync-status {
         position: fixed;
@@ -319,6 +404,10 @@
         <button id="addMovieBtn" type="button">Añadir</button>
       </div>
       <ul id="movieList" class="movie-list"></ul>
+      <div class="movie-random">
+        <button id="randomMovieBtn" type="button">Elegir película aleatoria</button>
+        <p id="randomMovieMessage" class="movie-random-message"></p>
+      </div>
     </aside>
     <aside id="thoughtMenu" class="thought-menu">
       <h3 class="thoughts-title">Pensamientos introspectivos</h3>
@@ -334,6 +423,16 @@
     </aside>
     <div class="wrap">
       <button id="btn">Clica para recibir un Abrasito⭐</button>
+      <div class="mood-card">
+        <p class="mood-title">¿Cómo te sientes hoy?</p>
+        <div id="moodRow" class="mood-row">
+          <button class="mood-chip" data-mood="Feliz 😊">Feliz 😊</button>
+          <button class="mood-chip" data-mood="Tranquilo/a 😌">Tranquilo/a 😌</button>
+          <button class="mood-chip" data-mood="Nostálgico/a 💜">Nostálgico/a 💜</button>
+          <button class="mood-chip" data-mood="Con energía ⚡">Con energía ⚡</button>
+        </div>
+        <p id="moodSelected" class="mood-selected">Ánimo actual: Sin elegir</p>
+      </div>
       <img id="flork" src="./Florkyflor.png" alt="Flork" />
       <div id="countdown" class="countdown">
         <p class="countdown-title">Tiempo para vernos (como máx)</p>
@@ -357,9 +456,13 @@
       const movieInput = document.getElementById("movieInput");
       const addMovieBtn = document.getElementById("addMovieBtn");
       const movieList = document.getElementById("movieList");
+      const randomMovieBtn = document.getElementById("randomMovieBtn");
+      const randomMovieMessage = document.getElementById("randomMovieMessage");
       const thoughtInput = document.getElementById("thoughtInput");
       const addThoughtBtn = document.getElementById("addThoughtBtn");
       const thoughtList = document.getElementById("thoughtList");
+      const moodRow = document.getElementById("moodRow");
+      const moodSelected = document.getElementById("moodSelected");
       const syncStatus = document.getElementById("syncStatus");
       let countdownTimer = null;
 
@@ -378,6 +481,7 @@
 
       let movies = [];
       let thoughts = [];
+      const MOOD_STORAGE_KEY = "currentMood";
       let statusTimer = null;
 
       function showStatus(message, isError = false) {
@@ -495,10 +599,16 @@
               <input type="checkbox" />
               Visto
             </label>
+            <div class="entry-actions">
+              <button type="button" class="btn-edit">Editar</button>
+              <button type="button" class="btn-delete">Borrar</button>
+            </div>
           `;
 
           const titleEl = item.querySelector(".movie-title");
           const checkbox = item.querySelector('input[type="checkbox"]');
+          const editBtn = item.querySelector(".btn-edit");
+          const deleteBtn = item.querySelector(".btn-delete");
           titleEl.textContent = movie.title;
           checkbox.id = `movieSeen${movie.id}`;
           checkbox.checked = movie.seen;
@@ -515,6 +625,36 @@
               showStatus(`Error actualizando película: ${error.message}`, true);
               console.error("Error al actualizar película:", error.message);
             }
+          });
+          editBtn.addEventListener("click", async () => {
+            const updatedTitle = window
+              .prompt("Edita el título de la película:", movie.title)
+              ?.trim();
+            if (!updatedTitle || updatedTitle === movie.title) return;
+            const { error } = await supabaseClient
+              .from(MOVIES_TABLE)
+              .update({ title: updatedTitle })
+              .eq("id", movie.id);
+            if (error) {
+              showStatus(`Error editando película: ${error.message}`, true);
+              return;
+            }
+            await loadMovies();
+            showStatus("Película editada.");
+          });
+          deleteBtn.addEventListener("click", async () => {
+            const ok = window.confirm(`¿Borrar "${movie.title}"?`);
+            if (!ok) return;
+            const { error } = await supabaseClient
+              .from(MOVIES_TABLE)
+              .delete()
+              .eq("id", movie.id);
+            if (error) {
+              showStatus(`Error borrando película: ${error.message}`, true);
+              return;
+            }
+            await loadMovies();
+            showStatus("Película borrada.");
           });
 
           movieList.appendChild(item);
@@ -543,15 +683,75 @@
         thoughts.forEach((thought) => {
           const item = document.createElement("li");
           item.className = "thought-item";
+          const top = document.createElement("div");
+          top.className = "thought-item-top";
           const text = document.createElement("div");
           text.textContent = thought.text;
+          const actions = document.createElement("div");
+          actions.className = "entry-actions";
+          actions.innerHTML = `
+            <button type="button" class="btn-edit">Editar</button>
+            <button type="button" class="btn-delete">Borrar</button>
+          `;
           const meta = document.createElement("div");
           meta.className = "thought-item-meta";
           meta.textContent = `#${thought.id} - ${thought.createdAt}`;
-          item.appendChild(text);
+          top.appendChild(text);
+          top.appendChild(actions);
+          item.appendChild(top);
           item.appendChild(meta);
           thoughtList.appendChild(item);
+
+          const editBtn = actions.querySelector(".btn-edit");
+          const deleteBtn = actions.querySelector(".btn-delete");
+          editBtn.addEventListener("click", async () => {
+            const updatedText = window
+              .prompt("Edita el pensamiento:", thought.text)
+              ?.trim();
+            if (!updatedText || updatedText === thought.text) return;
+            const { error } = await supabaseClient
+              .from(THOUGHTS_TABLE)
+              .update({ text: updatedText })
+              .eq("id", thought.id);
+            if (error) {
+              showStatus(`Error editando pensamiento: ${error.message}`, true);
+              return;
+            }
+            await loadThoughts();
+            showStatus("Pensamiento editado.");
+          });
+          deleteBtn.addEventListener("click", async () => {
+            const ok = window.confirm("¿Borrar este pensamiento?");
+            if (!ok) return;
+            const { error } = await supabaseClient
+              .from(THOUGHTS_TABLE)
+              .delete()
+              .eq("id", thought.id);
+            if (error) {
+              showStatus(`Error borrando pensamiento: ${error.message}`, true);
+              return;
+            }
+            await loadThoughts();
+            showStatus("Pensamiento borrado.");
+          });
         });
+      }
+
+      function chooseRandomMovie() {
+        if (!movies.length) {
+          randomMovieMessage.textContent = "No hay películas todavía.";
+          return;
+        }
+        const pick = movies[Math.floor(Math.random() * movies.length)];
+        randomMovieMessage.textContent = `La película elegida es ${pick.title}!`;
+      }
+
+      function applyMood(mood) {
+        const chips = moodRow.querySelectorAll(".mood-chip");
+        chips.forEach((chip) => {
+          chip.classList.toggle("active", chip.dataset.mood === mood);
+        });
+        moodSelected.textContent = `Ánimo actual: ${mood || "Sin elegir"}`;
       }
 
       async function addThought(text) {
@@ -621,6 +821,7 @@
         movieInput.focus();
         await loadMovies();
       });
+      randomMovieBtn.addEventListener("click", chooseRandomMovie);
 
       movieInput.addEventListener("keydown", async (event) => {
         if (event.key === "Enter") {
@@ -644,6 +845,13 @@
           thoughtInput.focus();
           await loadThoughts();
         }
+      });
+      moodRow.addEventListener("click", (event) => {
+        const chip = event.target.closest(".mood-chip");
+        if (!chip) return;
+        const mood = chip.dataset.mood || "";
+        localStorage.setItem(MOOD_STORAGE_KEY, mood);
+        applyMood(mood);
       });
 
       function subscribeRealtime() {
@@ -678,6 +886,8 @@
         await loadMovies();
         await loadThoughts();
         subscribeRealtime();
+        const storedMood = localStorage.getItem(MOOD_STORAGE_KEY) || "";
+        applyMood(storedMood);
         showStatus(
           `Conectado a Supabase (${MOVIES_TABLE} / ${THOUGHTS_TABLE}).`
         );
