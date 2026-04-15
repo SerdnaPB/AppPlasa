@@ -211,6 +211,23 @@
         font-size: 12px;
         opacity: 0.8;
       }
+      .sync-status {
+        position: fixed;
+        bottom: 12px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 40;
+        max-width: min(760px, 94vw);
+        padding: 10px 12px;
+        border-radius: 10px;
+        background: rgba(2, 6, 23, 0.82);
+        color: #f8fafc;
+        font-size: 13px;
+        display: none;
+      }
+      .sync-status.show {
+        display: block;
+      }
       @media (max-width: 860px) {
         .movie-menu {
           width: min(360px, 92vw);
@@ -288,6 +305,7 @@
     </button>
     <div id="menuBackdrop" class="menu-backdrop"></div>
     <div id="thoughtBackdrop" class="menu-backdrop"></div>
+    <div id="syncStatus" class="sync-status"></div>
     <div id="msg" class="top-message">Que pases un precioso(como tú) día💜🧸</div>
     <aside id="movieMenu" class="movie-menu">
       <h3>Películas para ver</h3>
@@ -342,6 +360,7 @@
       const thoughtInput = document.getElementById("thoughtInput");
       const addThoughtBtn = document.getElementById("addThoughtBtn");
       const thoughtList = document.getElementById("thoughtList");
+      const syncStatus = document.getElementById("syncStatus");
       let countdownTimer = null;
 
       // IMPORTANTE: para frontend se usa el endpoint *.supabase.co (no el dashboard URL).
@@ -352,9 +371,48 @@
         SUPABASE_URL,
         SUPABASE_ANON_KEY
       );
+      const MOVIE_TABLE_CANDIDATES = ["movies", "Movies"];
+      const THOUGHT_TABLE_CANDIDATES = ["thoughts", "Thoughts"];
+      let MOVIES_TABLE = "movies";
+      let THOUGHTS_TABLE = "thoughts";
 
       let movies = [];
       let thoughts = [];
+      let statusTimer = null;
+
+      function showStatus(message, isError = false) {
+        syncStatus.textContent = message;
+        syncStatus.classList.add("show");
+        syncStatus.style.background = isError
+          ? "rgba(127, 29, 29, 0.92)"
+          : "rgba(2, 6, 23, 0.82)";
+        if (statusTimer) clearTimeout(statusTimer);
+        if (!isError) {
+          statusTimer = setTimeout(() => {
+            syncStatus.classList.remove("show");
+          }, 2500);
+        }
+      }
+
+      async function resolveTableName(candidates) {
+        for (const name of candidates) {
+          const { error } = await supabaseClient.from(name).select("id").limit(1);
+          if (!error) return name;
+          const code = error.code || "";
+          const isMissingTable = code === "PGRST205" || code === "42P01";
+          if (!isMissingTable) {
+            // Si no es error de tabla inexistente, devolvemos el nombre para
+            // que el mensaje posterior muestre el error real (RLS/columnas/etc.).
+            return name;
+          }
+        }
+        return candidates[0];
+      }
+
+      async function initSupabaseBindings() {
+        MOVIES_TABLE = await resolveTableName(MOVIE_TABLE_CANDIDATES);
+        THOUGHTS_TABLE = await resolveTableName(THOUGHT_TABLE_CANDIDATES);
+      }
 
       function openMovieMenu() {
         movieMenu.classList.add("open");
@@ -448,12 +506,13 @@
             const newSeen = checkbox.checked;
             item.classList.toggle("seen", newSeen);
             const { error } = await supabaseClient
-              .from("movies")
+              .from(MOVIES_TABLE)
               .update({ seen: newSeen })
               .eq("id", movie.id);
             if (error) {
               checkbox.checked = !newSeen;
               item.classList.toggle("seen", !newSeen);
+              showStatus(`Error actualizando película: ${error.message}`, true);
               console.error("Error al actualizar película:", error.message);
             }
           });
@@ -466,13 +525,16 @@
         const cleanTitle = title.trim();
         if (!cleanTitle) return;
 
-        const { error } = await supabaseClient.from("movies").insert({
+        const { error } = await supabaseClient.from(MOVIES_TABLE).insert({
           title: cleanTitle,
           seen: false,
         });
         if (error) {
+          showStatus(`Error guardando película: ${error.message}`, true);
           console.error("Error al guardar película:", error.message);
+          return;
         }
+        showStatus("Película guardada.");
       }
 
       function renderThoughts() {
@@ -496,20 +558,24 @@
         const cleanText = text.trim();
         if (!cleanText) return;
 
-        const { error } = await supabaseClient.from("thoughts").insert({
+        const { error } = await supabaseClient.from(THOUGHTS_TABLE).insert({
           text: cleanText,
         });
         if (error) {
+          showStatus(`Error guardando pensamiento: ${error.message}`, true);
           console.error("Error al guardar pensamiento:", error.message);
+          return;
         }
+        showStatus("Pensamiento guardado.");
       }
 
       async function loadMovies() {
         const { data, error } = await supabaseClient
-          .from("movies")
+          .from(MOVIES_TABLE)
           .select("id, title, seen")
           .order("id", { ascending: true });
         if (error) {
+          showStatus(`Error cargando películas: ${error.message}`, true);
           console.error("Error al cargar películas:", error.message);
           return;
         }
@@ -526,10 +592,11 @@
 
       async function loadThoughts() {
         const { data, error } = await supabaseClient
-          .from("thoughts")
+          .from(THOUGHTS_TABLE)
           .select("id, text, created_at")
           .order("id", { ascending: true });
         if (error) {
+          showStatus(`Error cargando pensamientos: ${error.message}`, true);
           console.error("Error al cargar pensamientos:", error.message);
           return;
         }
@@ -582,7 +649,7 @@
           .channel("movies-changes")
           .on(
             "postgres_changes",
-            { event: "*", schema: "public", table: "movies" },
+            { event: "*", schema: "public", table: MOVIES_TABLE },
             () => {
               loadMovies();
             }
@@ -593,7 +660,7 @@
           .channel("thoughts-changes")
           .on(
             "postgres_changes",
-            { event: "*", schema: "public", table: "thoughts" },
+            { event: "*", schema: "public", table: THOUGHTS_TABLE },
             () => {
               loadThoughts();
             }
@@ -604,9 +671,15 @@
       // Fuerza estado inicial consistente en primera carga.
       closeMovieMenu();
       closeThoughtMenu();
-      loadMovies();
-      loadThoughts();
-      subscribeRealtime();
+      (async () => {
+        await initSupabaseBindings();
+        await loadMovies();
+        await loadThoughts();
+        subscribeRealtime();
+        showStatus(
+          `Conectado a Supabase (${MOVIES_TABLE} / ${THOUGHTS_TABLE}).`
+        );
+      })();
 
       function formatRemaining(ms) {
         const totalSeconds = Math.floor(ms / 1000);
@@ -645,6 +718,8 @@
     </script>
   </body>
 </html>
+
+
 
 
 
