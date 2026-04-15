@@ -323,6 +323,7 @@
       </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
       const btn = document.getElementById("btn");
       const img = document.getElementById("flork");
@@ -342,10 +343,16 @@
       const addThoughtBtn = document.getElementById("addThoughtBtn");
       const thoughtList = document.getElementById("thoughtList");
       let countdownTimer = null;
-      let movieId = 0;
-      let thoughtId = 0;
-      const MOVIES_STORAGE_KEY = "peliculasParaVer";
-      const THOUGHTS_STORAGE_KEY = "pensamientosNoDichos";
+
+      // IMPORTANTE: para frontend se usa el endpoint *.supabase.co (no el dashboard URL).
+      const SUPABASE_URL = "https://vkhoxnixhqnztbbosqdk.supabase.co";
+      const SUPABASE_ANON_KEY =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZraG94bml4aHFuenRiYm9zcWRrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYyMzgwMDQsImV4cCI6MjA5MTgxNDAwNH0.-dUd_GEBS90Cw4rZ8UN6AuZRIsbwHJ9cvDOsLPzpd7k";
+      const supabaseClient = window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_ANON_KEY
+      );
+
       let movies = [];
       let thoughts = [];
 
@@ -418,14 +425,6 @@
         }
       });
 
-      function saveMovies() {
-        localStorage.setItem(MOVIES_STORAGE_KEY, JSON.stringify(movies));
-      }
-
-      function saveThoughts() {
-        localStorage.setItem(THOUGHTS_STORAGE_KEY, JSON.stringify(thoughts));
-      }
-
       function renderMovies() {
         movieList.innerHTML = "";
 
@@ -445,28 +444,35 @@
           titleEl.textContent = movie.title;
           checkbox.id = `movieSeen${movie.id}`;
           checkbox.checked = movie.seen;
-          checkbox.addEventListener("change", () => {
-            movie.seen = checkbox.checked;
-            item.classList.toggle("seen", checkbox.checked);
-            saveMovies();
+          checkbox.addEventListener("change", async () => {
+            const newSeen = checkbox.checked;
+            item.classList.toggle("seen", newSeen);
+            const { error } = await supabaseClient
+              .from("movies")
+              .update({ seen: newSeen })
+              .eq("id", movie.id);
+            if (error) {
+              checkbox.checked = !newSeen;
+              item.classList.toggle("seen", !newSeen);
+              console.error("Error al actualizar película:", error.message);
+            }
           });
 
           movieList.appendChild(item);
         });
       }
 
-      function addMovie(title) {
+      async function addMovie(title) {
         const cleanTitle = title.trim();
         if (!cleanTitle) return;
 
-        movieId += 1;
-        movies.push({
-          id: movieId,
+        const { error } = await supabaseClient.from("movies").insert({
           title: cleanTitle,
           seen: false,
         });
-        saveMovies();
-        renderMovies();
+        if (error) {
+          console.error("Error al guardar película:", error.message);
+        }
       }
 
       function renderThoughts() {
@@ -486,111 +492,121 @@
         });
       }
 
-      function addThought(text) {
+      async function addThought(text) {
         const cleanText = text.trim();
         if (!cleanText) return;
 
-        thoughtId += 1;
-        const now = new Date();
-        thoughts.push({
-          id: thoughtId,
+        const { error } = await supabaseClient.from("thoughts").insert({
           text: cleanText,
-          createdAt: now.toLocaleString("es-ES"),
         });
+        if (error) {
+          console.error("Error al guardar pensamiento:", error.message);
+        }
+      }
 
-        saveThoughts();
+      async function loadMovies() {
+        const { data, error } = await supabaseClient
+          .from("movies")
+          .select("id, title, seen")
+          .order("id", { ascending: true });
+        if (error) {
+          console.error("Error al cargar películas:", error.message);
+          return;
+        }
+        movies = (data || [])
+          .filter((movie) => movie && typeof movie.title === "string")
+          .map((movie) => ({
+            id: Number(movie.id),
+            title: movie.title.trim(),
+            seen: Boolean(movie.seen),
+          }))
+          .filter((movie) => movie.title.length > 0);
+        renderMovies();
+      }
+
+      async function loadThoughts() {
+        const { data, error } = await supabaseClient
+          .from("thoughts")
+          .select("id, text, created_at")
+          .order("id", { ascending: true });
+        if (error) {
+          console.error("Error al cargar pensamientos:", error.message);
+          return;
+        }
+        thoughts = (data || [])
+          .filter((thought) => thought && typeof thought.text === "string")
+          .map((thought) => ({
+            id: Number(thought.id),
+            text: thought.text.trim(),
+            createdAt: thought.created_at
+              ? new Date(thought.created_at).toLocaleString("es-ES")
+              : "Sin fecha",
+          }))
+          .filter((thought) => thought.text.length > 0);
         renderThoughts();
       }
 
-      function loadMovies() {
-        try {
-          const raw = localStorage.getItem(MOVIES_STORAGE_KEY);
-          if (!raw) return;
-          const parsed = JSON.parse(raw);
-          if (!Array.isArray(parsed)) return;
-
-          movies = parsed
-            .filter((movie) => movie && typeof movie.title === "string")
-            .map((movie) => ({
-              id: Number(movie.id) || 0,
-              title: movie.title.trim(),
-              seen: Boolean(movie.seen),
-            }))
-            .filter((movie) => movie.title.length > 0);
-
-          movieId = movies.reduce((maxId, movie) => Math.max(maxId, movie.id), 0);
-          renderMovies();
-        } catch (_error) {
-          movies = [];
-          movieId = 0;
-          renderMovies();
-        }
-      }
-
-      function loadThoughts() {
-        try {
-          const raw = localStorage.getItem(THOUGHTS_STORAGE_KEY);
-          if (!raw) {
-            renderThoughts();
-            return;
-          }
-          const parsed = JSON.parse(raw);
-          if (!Array.isArray(parsed)) {
-            renderThoughts();
-            return;
-          }
-
-          thoughts = parsed
-            .filter((thought) => thought && typeof thought.text === "string")
-            .map((thought) => ({
-              id: Number(thought.id) || 0,
-              text: thought.text.trim(),
-              createdAt:
-                typeof thought.createdAt === "string" && thought.createdAt
-                  ? thought.createdAt
-                  : "Sin fecha",
-            }))
-            .filter((thought) => thought.text.length > 0);
-
-          thoughtId = thoughts.reduce(
-            (maxId, thought) => Math.max(maxId, thought.id),
-            0
-          );
-          renderThoughts();
-        } catch (_error) {
-          thoughts = [];
-          thoughtId = 0;
-          renderThoughts();
-        }
-      }
-
-      addMovieBtn.addEventListener("click", () => {
-        addMovie(movieInput.value);
+      addMovieBtn.addEventListener("click", async () => {
+        await addMovie(movieInput.value);
         movieInput.value = "";
         movieInput.focus();
+        await loadMovies();
       });
 
-      movieInput.addEventListener("keydown", (event) => {
+      movieInput.addEventListener("keydown", async (event) => {
         if (event.key === "Enter") {
-          addMovieBtn.click();
+          await addMovie(movieInput.value);
+          movieInput.value = "";
+          movieInput.focus();
+          await loadMovies();
         }
       });
-      addThoughtBtn.addEventListener("click", () => {
-        addThought(thoughtInput.value);
+      addThoughtBtn.addEventListener("click", async () => {
+        await addThought(thoughtInput.value);
         thoughtInput.value = "";
         thoughtInput.focus();
+        await loadThoughts();
       });
 
-      thoughtInput.addEventListener("keydown", (event) => {
+      thoughtInput.addEventListener("keydown", async (event) => {
         if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
-          addThoughtBtn.click();
+          await addThought(thoughtInput.value);
+          thoughtInput.value = "";
+          thoughtInput.focus();
+          await loadThoughts();
         }
       });
+
+      function subscribeRealtime() {
+        supabaseClient
+          .channel("movies-changes")
+          .on(
+            "postgres_changes",
+            { event: "*", schema: "public", table: "movies" },
+            () => {
+              loadMovies();
+            }
+          )
+          .subscribe();
+
+        supabaseClient
+          .channel("thoughts-changes")
+          .on(
+            "postgres_changes",
+            { event: "*", schema: "public", table: "thoughts" },
+            () => {
+              loadThoughts();
+            }
+          )
+          .subscribe();
+      }
+
       // Fuerza estado inicial consistente en primera carga.
       closeMovieMenu();
       closeThoughtMenu();
       loadMovies();
       loadThoughts();
+      subscribeRealtime();
 
       function formatRemaining(ms) {
         const totalSeconds = Math.floor(ms / 1000);
