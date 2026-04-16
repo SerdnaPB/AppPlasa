@@ -291,6 +291,18 @@
         font-size: 14px;
         font-weight: 700;
       }
+      .mood-reason-input {
+        width: 100%;
+        margin-top: 10px;
+        border: 1px solid rgba(110, 231, 183, 0.55);
+        border-radius: 10px;
+        padding: 10px 12px;
+        background: rgba(236, 253, 245, 0.95);
+        color: #064e3b;
+        resize: vertical;
+        min-height: 74px;
+        box-sizing: border-box;
+      }
       .sync-status {
         position: fixed;
         bottom: 12px;
@@ -436,6 +448,12 @@
           </div>
         </div>
         <p id="moodSelected" class="mood-selected">Ánimo actual: Sin elegir</p>
+        <textarea
+          id="moodReason"
+          class="mood-reason-input"
+          placeholder="Motivo..."
+          maxlength="280"
+        ></textarea>
       </div>
       <img id="flork" src="./Florkyflor.png" alt="Flork" />
       <div id="countdown" class="countdown">
@@ -467,6 +485,7 @@
       const thoughtList = document.getElementById("thoughtList");
       const moodSlider = document.getElementById("moodSlider");
       const moodSelected = document.getElementById("moodSelected");
+      const moodReason = document.getElementById("moodReason");
       const syncStatus = document.getElementById("syncStatus");
       let countdownTimer = null;
 
@@ -488,8 +507,10 @@
       let movies = [];
       let thoughts = [];
       const MOOD_STORAGE_KEY = "currentMood";
+      const MOOD_REASON_STORAGE_KEY = "currentMoodReason";
       const MOOD_ROW_ID = 1;
       let statusTimer = null;
+      let moodReasonSaveTimer = null;
 
       function showStatus(message, isError = false) {
         syncStatus.textContent = message;
@@ -773,6 +794,10 @@
         )} (${normalized}/100)`;
       }
 
+      function applyMoodReason(rawReason) {
+        moodReason.value = typeof rawReason === "string" ? rawReason : "";
+      }
+
       async function saveMood(rawValue) {
         const moodValue = Number(rawValue);
         if (!Number.isFinite(moodValue)) return;
@@ -791,10 +816,28 @@
         }
       }
 
+      async function saveMoodReason(rawReason) {
+        const reasonText = typeof rawReason === "string" ? rawReason.trim() : "";
+        localStorage.setItem(MOOD_REASON_STORAGE_KEY, reasonText);
+        const moodValue = Number(moodSlider.value);
+        const { error } = await supabaseClient.from(MOODS_TABLE).upsert(
+          {
+            id: MOOD_ROW_ID,
+            value: Number.isFinite(moodValue) ? moodValue : 50,
+            reason: reasonText,
+          },
+          { onConflict: "id" }
+        );
+        if (error) {
+          showStatus(`Error guardando motivo: ${error.message}`, true);
+          console.error("Error al guardar motivo:", error.message);
+        }
+      }
+
       async function loadMood() {
         const { data, error } = await supabaseClient
           .from(MOODS_TABLE)
-          .select("id, value, created_at, updated_at")
+          .select("id, value, reason, created_at, updated_at")
           .eq("id", MOOD_ROW_ID)
           .maybeSingle();
         if (error) {
@@ -802,16 +845,25 @@
           console.error("Error al cargar ánimo:", error.message);
           const storedMood = localStorage.getItem(MOOD_STORAGE_KEY);
           applyMood(storedMood ?? "50");
+          const storedMoodReason = localStorage.getItem(MOOD_REASON_STORAGE_KEY);
+          applyMoodReason(storedMoodReason ?? "");
           return;
         }
         const dbValue = Number(data?.value);
         if (Number.isFinite(dbValue)) {
           localStorage.setItem(MOOD_STORAGE_KEY, String(dbValue));
           applyMood(dbValue);
-          return;
+        } else {
+          const storedMood = localStorage.getItem(MOOD_STORAGE_KEY);
+          applyMood(storedMood ?? "50");
         }
-        const storedMood = localStorage.getItem(MOOD_STORAGE_KEY);
-        applyMood(storedMood ?? "50");
+        if (typeof data?.reason === "string") {
+          localStorage.setItem(MOOD_REASON_STORAGE_KEY, data.reason);
+          applyMoodReason(data.reason);
+        } else {
+          const storedMoodReason = localStorage.getItem(MOOD_REASON_STORAGE_KEY);
+          applyMoodReason(storedMoodReason ?? "");
+        }
       }
 
       async function addThought(text) {
@@ -909,6 +961,16 @@
       moodSlider.addEventListener("input", async () => {
         await saveMood(moodSlider.value);
       });
+      moodReason.addEventListener("input", () => {
+        if (moodReasonSaveTimer) clearTimeout(moodReasonSaveTimer);
+        moodReasonSaveTimer = setTimeout(() => {
+          saveMoodReason(moodReason.value);
+        }, 450);
+      });
+      moodReason.addEventListener("blur", async () => {
+        if (moodReasonSaveTimer) clearTimeout(moodReasonSaveTimer);
+        await saveMoodReason(moodReason.value);
+      });
 
       function subscribeRealtime() {
         supabaseClient
@@ -996,10 +1058,3 @@
     </script>
   </body>
 </html>
-
-
-
-
-
-
-
