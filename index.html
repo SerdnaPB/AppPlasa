@@ -480,12 +480,15 @@
       );
       const MOVIE_TABLE_CANDIDATES = ["movies", "Movies"];
       const THOUGHT_TABLE_CANDIDATES = ["thoughts", "Thoughts"];
+      const MOOD_TABLE_CANDIDATES = ["moods", "Moods", "mood", "Mood"];
       let MOVIES_TABLE = "movies";
       let THOUGHTS_TABLE = "thoughts";
+      let MOODS_TABLE = "moods";
 
       let movies = [];
       let thoughts = [];
       const MOOD_STORAGE_KEY = "currentMood";
+      const MOOD_ROW_ID = 1;
       let statusTimer = null;
 
       function showStatus(message, isError = false) {
@@ -520,6 +523,7 @@
       async function initSupabaseBindings() {
         MOVIES_TABLE = await resolveTableName(MOVIE_TABLE_CANDIDATES);
         THOUGHTS_TABLE = await resolveTableName(THOUGHT_TABLE_CANDIDATES);
+        MOODS_TABLE = await resolveTableName(MOOD_TABLE_CANDIDATES);
       }
 
       function openMovieMenu() {
@@ -769,6 +773,47 @@
         )} (${normalized}/100)`;
       }
 
+      async function saveMood(rawValue) {
+        const moodValue = Number(rawValue);
+        if (!Number.isFinite(moodValue)) return;
+        localStorage.setItem(MOOD_STORAGE_KEY, String(moodValue));
+        applyMood(moodValue);
+        const { error } = await supabaseClient.from(MOODS_TABLE).upsert(
+          {
+            id: MOOD_ROW_ID,
+            value: moodValue,
+          },
+          { onConflict: "id" }
+        );
+        if (error) {
+          showStatus(`Error guardando ánimo: ${error.message}`, true);
+          console.error("Error al guardar ánimo:", error.message);
+        }
+      }
+
+      async function loadMood() {
+        const { data, error } = await supabaseClient
+          .from(MOODS_TABLE)
+          .select("id, value, created_at, updated_at")
+          .eq("id", MOOD_ROW_ID)
+          .maybeSingle();
+        if (error) {
+          showStatus(`Error cargando ánimo: ${error.message}`, true);
+          console.error("Error al cargar ánimo:", error.message);
+          const storedMood = localStorage.getItem(MOOD_STORAGE_KEY);
+          applyMood(storedMood ?? "50");
+          return;
+        }
+        const dbValue = Number(data?.value);
+        if (Number.isFinite(dbValue)) {
+          localStorage.setItem(MOOD_STORAGE_KEY, String(dbValue));
+          applyMood(dbValue);
+          return;
+        }
+        const storedMood = localStorage.getItem(MOOD_STORAGE_KEY);
+        applyMood(storedMood ?? "50");
+      }
+
       async function addThought(text) {
         const cleanText = text.trim();
         if (!cleanText) return;
@@ -861,10 +906,8 @@
           await loadThoughts();
         }
       });
-      moodSlider.addEventListener("input", () => {
-        const moodValue = Number(moodSlider.value);
-        localStorage.setItem(MOOD_STORAGE_KEY, String(moodValue));
-        applyMood(moodValue);
+      moodSlider.addEventListener("input", async () => {
+        await saveMood(moodSlider.value);
       });
 
       function subscribeRealtime() {
@@ -889,6 +932,17 @@
             }
           )
           .subscribe();
+
+        supabaseClient
+          .channel("moods-changes")
+          .on(
+            "postgres_changes",
+            { event: "*", schema: "public", table: MOODS_TABLE },
+            () => {
+              loadMood();
+            }
+          )
+          .subscribe();
       }
 
       // Fuerza estado inicial consistente en primera carga.
@@ -898,11 +952,10 @@
         await initSupabaseBindings();
         await loadMovies();
         await loadThoughts();
+        await loadMood();
         subscribeRealtime();
-        const storedMood = localStorage.getItem(MOOD_STORAGE_KEY);
-        applyMood(storedMood ?? "50");
         showStatus(
-          `Conectado a Supabase (${MOVIES_TABLE} / ${THOUGHTS_TABLE}).`
+          `Conectado a Supabase (${MOVIES_TABLE} / ${THOUGHTS_TABLE} / ${MOODS_TABLE}).`
         );
       })();
 
@@ -943,7 +996,6 @@
     </script>
   </body>
 </html>
-
 
 
 
