@@ -901,6 +901,14 @@
             author_id: CLIENT_ID,
           });
           error = result.error;
+          if (error) {
+            // Si fallan columnas/permisos de recibos de lectura, degradamos a modo básico.
+            thoughtsSupportsReadReceipts = false;
+            const fallback = await supabaseClient.from(THOUGHTS_TABLE).insert({
+              text: cleanText,
+            });
+            error = fallback.error;
+          }
         } else {
           const result = await supabaseClient.from(THOUGHTS_TABLE).insert({
             text: cleanText,
@@ -941,11 +949,21 @@
         const selectColumns = thoughtsSupportsReadReceipts
           ? "id, text, created_at, author_id, seen_at, seen_by"
           : "id, text, created_at";
-        const { data, error } = await supabaseClient
+        let { data, error } = await supabaseClient
           .from(THOUGHTS_TABLE)
           .select(selectColumns)
           .order("created_at", { ascending: false, nullsFirst: false })
           .order("id", { ascending: false });
+        if (error && thoughtsSupportsReadReceipts) {
+          thoughtsSupportsReadReceipts = false;
+          const fallback = await supabaseClient
+            .from(THOUGHTS_TABLE)
+            .select("id, text, created_at")
+            .order("created_at", { ascending: false, nullsFirst: false })
+            .order("id", { ascending: false });
+          data = fallback.data;
+          error = fallback.error;
+        }
         if (error) {
           showStatus(`Error cargando pensamientos: ${error.message}`, true);
           console.error("Error al cargar pensamientos:", error.message);
@@ -1118,4 +1136,3 @@
     </script>
   </body>
 </html>
-
