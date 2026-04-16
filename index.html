@@ -509,8 +509,16 @@
       const MOOD_STORAGE_KEY = "currentMood";
       const MOOD_REASON_STORAGE_KEY = "currentMoodReason";
       const MOOD_ROW_ID = 1;
+      const CLIENT_ID_STORAGE_KEY = "thoughtClientId";
       let statusTimer = null;
       let moodReasonSaveTimer = null;
+      const CLIENT_ID = (() => {
+        const existingId = localStorage.getItem(CLIENT_ID_STORAGE_KEY);
+        if (existingId) return existingId;
+        const newId = `user-${Math.random().toString(36).slice(2, 10)}`;
+        localStorage.setItem(CLIENT_ID_STORAGE_KEY, newId);
+        return newId;
+      })();
 
       function showStatus(message, isError = false) {
         syncStatus.textContent = message;
@@ -560,6 +568,7 @@
       function openThoughtMenu() {
         thoughtMenu.classList.add("open");
         thoughtBackdrop.classList.add("open");
+        markThoughtsAsSeenByOther();
       }
 
       function closeThoughtMenu() {
@@ -724,7 +733,16 @@
           `;
           const meta = document.createElement("div");
           meta.className = "thought-item-meta";
-          meta.textContent = `#${thought.id} - ${thought.createdAt}`;
+          const isMine = thought.authorId === CLIENT_ID;
+          const seenText =
+            thought.seenAt && isMine
+              ? ` - Visto (${thought.seenAt})`
+              : thought.seenAt
+              ? " - Visto por ti"
+              : isMine
+              ? " - Enviado"
+              : " - No visto";
+          meta.textContent = `#${thought.id} - ${thought.createdAt}${seenText}`;
           top.appendChild(text);
           top.appendChild(actions);
           item.appendChild(top);
@@ -872,6 +890,7 @@
 
         const { error } = await supabaseClient.from(THOUGHTS_TABLE).insert({
           text: cleanText,
+          author_id: CLIENT_ID,
         });
         if (error) {
           showStatus(`Error guardando pensamiento: ${error.message}`, true);
@@ -906,7 +925,7 @@
       async function loadThoughts() {
         const { data, error } = await supabaseClient
           .from(THOUGHTS_TABLE)
-          .select("id, text, created_at")
+          .select("id, text, created_at, author_id, seen_at, seen_by")
           .order("created_at", { ascending: false, nullsFirst: false })
           .order("id", { ascending: false });
         if (error) {
@@ -919,12 +938,34 @@
           .map((thought) => ({
             id: Number(thought.id),
             text: thought.text.trim(),
+            authorId: typeof thought.author_id === "string" ? thought.author_id : "",
+            seenAt: thought.seen_at
+              ? new Date(thought.seen_at).toLocaleString("es-ES")
+              : null,
+            seenBy: typeof thought.seen_by === "string" ? thought.seen_by : "",
             createdAt: thought.created_at
               ? new Date(thought.created_at).toLocaleString("es-ES")
               : "Sin fecha",
           }))
           .filter((thought) => thought.text.length > 0);
         renderThoughts();
+      }
+
+      async function markThoughtsAsSeenByOther() {
+        const { error } = await supabaseClient
+          .from(THOUGHTS_TABLE)
+          .update({
+            seen_at: new Date().toISOString(),
+            seen_by: CLIENT_ID,
+          })
+          .neq("author_id", CLIENT_ID)
+          .is("seen_at", null);
+        if (error) {
+          showStatus(`Error marcando vistos: ${error.message}`, true);
+          console.error("Error al marcar vistos:", error.message);
+          return;
+        }
+        await loadThoughts();
       }
 
       addMovieBtn.addEventListener("click", async () => {
