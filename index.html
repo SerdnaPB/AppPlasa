@@ -512,6 +512,7 @@
       const CLIENT_ID_STORAGE_KEY = "thoughtClientId";
       let statusTimer = null;
       let moodReasonSaveTimer = null;
+      let thoughtsSupportsReadReceipts = true;
       const CLIENT_ID = (() => {
         const existingId = localStorage.getItem(CLIENT_ID_STORAGE_KEY);
         if (existingId) return existingId;
@@ -553,6 +554,11 @@
         MOVIES_TABLE = await resolveTableName(MOVIE_TABLE_CANDIDATES);
         THOUGHTS_TABLE = await resolveTableName(THOUGHT_TABLE_CANDIDATES);
         MOODS_TABLE = await resolveTableName(MOOD_TABLE_CANDIDATES);
+        const { error } = await supabaseClient
+          .from(THOUGHTS_TABLE)
+          .select("id, author_id, seen_at, seen_by")
+          .limit(1);
+        thoughtsSupportsReadReceipts = !error;
       }
 
       function openMovieMenu() {
@@ -734,14 +740,15 @@
           const meta = document.createElement("div");
           meta.className = "thought-item-meta";
           const isMine = thought.authorId === CLIENT_ID;
-          const seenText =
-            thought.seenAt && isMine
+          const seenText = thoughtsSupportsReadReceipts
+            ? thought.seenAt && isMine
               ? ` - Visto (${thought.seenAt})`
               : thought.seenAt
               ? " - Visto por ti"
               : isMine
               ? " - Enviado"
-              : " - No visto";
+              : " - No visto"
+            : "";
           meta.textContent = `#${thought.id} - ${thought.createdAt}${seenText}`;
           top.appendChild(text);
           top.appendChild(actions);
@@ -887,11 +894,19 @@
       async function addThought(text) {
         const cleanText = text.trim();
         if (!cleanText) return;
-
-        const { error } = await supabaseClient.from(THOUGHTS_TABLE).insert({
-          text: cleanText,
-          author_id: CLIENT_ID,
-        });
+        let error = null;
+        if (thoughtsSupportsReadReceipts) {
+          const result = await supabaseClient.from(THOUGHTS_TABLE).insert({
+            text: cleanText,
+            author_id: CLIENT_ID,
+          });
+          error = result.error;
+        } else {
+          const result = await supabaseClient.from(THOUGHTS_TABLE).insert({
+            text: cleanText,
+          });
+          error = result.error;
+        }
         if (error) {
           showStatus(`Error guardando pensamiento: ${error.message}`, true);
           console.error("Error al guardar pensamiento:", error.message);
@@ -923,9 +938,12 @@
       }
 
       async function loadThoughts() {
+        const selectColumns = thoughtsSupportsReadReceipts
+          ? "id, text, created_at, author_id, seen_at, seen_by"
+          : "id, text, created_at";
         const { data, error } = await supabaseClient
           .from(THOUGHTS_TABLE)
-          .select("id, text, created_at, author_id, seen_at, seen_by")
+          .select(selectColumns)
           .order("created_at", { ascending: false, nullsFirst: false })
           .order("id", { ascending: false });
         if (error) {
@@ -952,6 +970,7 @@
       }
 
       async function markThoughtsAsSeenByOther() {
+        if (!thoughtsSupportsReadReceipts) return;
         const { error } = await supabaseClient
           .from(THOUGHTS_TABLE)
           .update({
@@ -1099,3 +1118,4 @@
     </script>
   </body>
 </html>
+
