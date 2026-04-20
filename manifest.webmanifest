@@ -1,0 +1,26 @@
+{
+  "name": "Abrasito de Andres",
+  "short_name": "Abrasito",
+  "description": "Abrasito de Andres",
+  "id": "/AppPlasa/",
+  "start_url": "/AppPlasa/",
+  "scope": "/AppPlasa/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0b1220",
+  "theme_color": "#0b1220",
+  "icons": [
+    {
+      "src": "/AppPlasa/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/AppPlasa/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
