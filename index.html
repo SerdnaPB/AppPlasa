@@ -122,7 +122,7 @@
           ),
           url("./Key.jpg");
         background-size: cover;
-        background-position: center 84%;
+        background-position: center 94%;
         background-repeat: no-repeat;
         border-left: 1px solid rgba(167, 139, 250, 0.5);
         box-shadow: 0 14px 34px rgba(0, 0, 0, 0.35);
@@ -177,10 +177,12 @@
         transition: transform 140ms ease, background-color 140ms ease;
         touch-action: pan-y;
       }
-      .movie-item.swiping-edit {
+      .movie-item.swiping-edit,
+      .thought-item.swiping-edit {
         background: rgba(34, 197, 94, 0.3);
       }
-      .movie-item.swiping-delete {
+      .movie-item.swiping-delete,
+      .thought-item.swiping-delete {
         background: rgba(239, 68, 68, 0.3);
       }
       .entry-actions {
@@ -260,8 +262,10 @@
         padding: 8px 10px;
         line-height: 1.35;
         word-break: break-word;
+        transition: transform 140ms ease, background-color 140ms ease;
+        touch-action: pan-y;
       }
-      .movie-swipe-hint {
+      .swipe-hint {
         margin: 0 0 10px;
         font-size: 12px;
         line-height: 1.3;
@@ -273,7 +277,7 @@
       }
       .thought-item-top {
         display: grid;
-        grid-template-columns: 1fr auto;
+        grid-template-columns: 1fr;
         gap: 8px;
         align-items: start;
       }
@@ -446,7 +450,7 @@
     <div id="msg" class="top-message">Que pases un precioso(como tú) día💜🧸</div>
     <aside id="movieMenu" class="movie-menu">
       <h3>Películas para ver</h3>
-      <p class="movie-swipe-hint">
+      <p class="swipe-hint">
         Desliza cada película: derecha para editar, izquierda para borrar.
       </p>
       <div class="movie-input-row">
@@ -466,6 +470,9 @@
     </aside>
     <aside id="thoughtMenu" class="thought-menu">
       <h3 class="thoughts-title">Pensamientos introspectivos</h3>
+      <p class="swipe-hint">
+        Desliza cada pensamiento: derecha para editar, izquierda para borrar.
+      </p>
       <div class="thoughts-input-row">
         <textarea
           id="thoughtInput"
@@ -823,12 +830,6 @@
           top.className = "thought-item-top";
           const text = document.createElement("div");
           text.textContent = thought.text;
-          const actions = document.createElement("div");
-          actions.className = "entry-actions";
-          actions.innerHTML = `
-            <button type="button" class="btn-edit">Editar</button>
-            <button type="button" class="btn-delete">Borrar</button>
-          `;
           const meta = document.createElement("div");
           meta.className = "thought-item-meta";
           const isMine = thought.authorId === CLIENT_ID;
@@ -843,14 +844,54 @@
             : "";
           meta.textContent = `#${thought.id} - ${thought.createdAt}${seenText}`;
           top.appendChild(text);
-          top.appendChild(actions);
           item.appendChild(top);
           item.appendChild(meta);
           thoughtList.appendChild(item);
+          setupThoughtSwipe(item, thought);
+        });
+      }
 
-          const editBtn = actions.querySelector(".btn-edit");
-          const deleteBtn = actions.querySelector(".btn-delete");
-          editBtn.addEventListener("click", async () => {
+      function setupThoughtSwipe(item, thought) {
+        const SWIPE_THRESHOLD = 70;
+        let startX = 0;
+        let currentX = 0;
+        let isDragging = false;
+
+        const resetVisual = () => {
+          item.style.transform = "translateX(0)";
+          item.classList.remove("swiping-edit", "swiping-delete");
+        };
+
+        item.addEventListener(
+          "touchstart",
+          (event) => {
+            if (!event.touches || event.touches.length !== 1) return;
+            startX = event.touches[0].clientX;
+            currentX = startX;
+            isDragging = true;
+          },
+          { passive: true }
+        );
+
+        item.addEventListener(
+          "touchmove",
+          (event) => {
+            if (!isDragging || !event.touches || event.touches.length !== 1) return;
+            currentX = event.touches[0].clientX;
+            const deltaX = Math.max(-90, Math.min(90, currentX - startX));
+            item.style.transform = `translateX(${deltaX}px)`;
+            item.classList.toggle("swiping-edit", deltaX > 24);
+            item.classList.toggle("swiping-delete", deltaX < -24);
+          },
+          { passive: true }
+        );
+
+        item.addEventListener("touchend", async () => {
+          if (!isDragging) return;
+          isDragging = false;
+          const deltaX = currentX - startX;
+          resetVisual();
+          if (deltaX >= SWIPE_THRESHOLD) {
             const updatedText = window
               .prompt("Edita el pensamiento:", thought.text)
               ?.trim();
@@ -865,8 +906,9 @@
             }
             await loadThoughts();
             showStatus("Pensamiento editado.");
-          });
-          deleteBtn.addEventListener("click", async () => {
+            return;
+          }
+          if (deltaX <= -SWIPE_THRESHOLD) {
             const ok = window.confirm("¿Borrar este pensamiento?");
             if (!ok) return;
             const { error } = await supabaseClient
@@ -879,7 +921,12 @@
             }
             await loadThoughts();
             showStatus("Pensamiento borrado.");
-          });
+          }
+        });
+
+        item.addEventListener("touchcancel", () => {
+          isDragging = false;
+          resetVisual();
         });
       }
 
