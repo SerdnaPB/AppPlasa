@@ -1242,6 +1242,17 @@
           .subscribe();
       }
 
+      function registerServiceWorker() {
+        if (!("serviceWorker" in navigator)) return;
+        window.addEventListener("load", () => {
+          navigator.serviceWorker
+            .register("/AppPlasa/sw.js")
+            .catch((error) =>
+              console.error("No se pudo registrar el service worker:", error)
+            );
+        });
+      }
+
       // Fuerza estado inicial consistente en primera carga.
       closeMovieMenu();
       closeThoughtMenu();
@@ -1251,6 +1262,7 @@
         await loadThoughts();
         await loadMood();
         subscribeRealtime();
+        registerServiceWorker();
         showStatus(
           `Conectado a Supabase (${MOVIES_TABLE} / ${THOUGHTS_TABLE} / ${MOODS_TABLE}).`
         );
