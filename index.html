@@ -319,6 +319,43 @@
         font-size: 14px;
         font-weight: 700;
       }
+      .beer-score {
+        margin-top: 12px;
+        border-top: 1px solid rgba(167, 139, 250, 0.35);
+        padding-top: 10px;
+        display: grid;
+        gap: 8px;
+      }
+      .beer-score-title {
+        margin: 0;
+        font-size: 14px;
+        font-weight: 800;
+      }
+      .beer-row {
+        display: grid;
+        grid-template-columns: 1fr auto auto;
+        gap: 8px;
+        align-items: center;
+        background: rgba(15, 23, 42, 0.22);
+        border-radius: 10px;
+        padding: 8px 10px;
+      }
+      .beer-name {
+        font-weight: 700;
+      }
+      .beer-count {
+        font-weight: 900;
+        font-size: 18px;
+      }
+      .beer-btn {
+        border: 0;
+        border-radius: 8px;
+        padding: 6px 10px;
+        font-weight: 800;
+        cursor: pointer;
+        background: rgba(34, 197, 94, 0.6);
+        color: #052e16;
+      }
       .mood-card {
         width: min(560px, 92vw);
         border-radius: 16px;
@@ -480,6 +517,19 @@
         <button id="randomMovieBtn" type="button">Elegir película aleatoria</button>
         <p id="randomMovieMessage" class="movie-random-message"></p>
       </div>
+      <div class="beer-score">
+        <p class="beer-score-title">Competición de cervezas 🍺</p>
+        <div class="beer-row">
+          <span class="beer-name">Andrés</span>
+          <span id="beerCountAndres" class="beer-count">0</span>
+          <button id="beerBtnAndres" class="beer-btn" type="button">+1</button>
+        </div>
+        <div class="beer-row">
+          <span class="beer-name">Claudia</span>
+          <span id="beerCountClaudia" class="beer-count">0</span>
+          <button id="beerBtnClaudia" class="beer-btn" type="button">+1</button>
+        </div>
+      </div>
     </aside>
     <aside id="thoughtMenu" class="thought-menu">
       <h3 class="thoughts-title">Pensamientos introspectivos</h3>
@@ -554,6 +604,11 @@
       const moodSlider = document.getElementById("moodSlider");
       const moodSelected = document.getElementById("moodSelected");
       const moodReason = document.getElementById("moodReason");
+      const moodCard = document.querySelector(".mood-card");
+      const beerBtnAndres = document.getElementById("beerBtnAndres");
+      const beerBtnClaudia = document.getElementById("beerBtnClaudia");
+      const beerCountAndres = document.getElementById("beerCountAndres");
+      const beerCountClaudia = document.getElementById("beerCountClaudia");
       const syncStatus = document.getElementById("syncStatus");
       let countdownTimer = null;
 
@@ -576,6 +631,8 @@
       let thoughts = [];
       const MOOD_STORAGE_KEY = "currentMood";
       const MOOD_REASON_STORAGE_KEY = "currentMoodReason";
+      const BEER_ANDRES_STORAGE_KEY = "beerCountAndres";
+      const BEER_CLAUDIA_STORAGE_KEY = "beerCountClaudia";
       const MOOD_ROW_ID = 1;
       const CLIENT_ID_STORAGE_KEY = "thoughtClientId";
       let statusTimer = null;
@@ -1011,6 +1068,27 @@
         }
       }
 
+      function parseBeerCount(value) {
+        const parsed = Number.parseInt(value, 10);
+        return Number.isFinite(parsed) && parsed >= 0 ? parsed : 0;
+      }
+
+      function renderBeerCounts() {
+        beerCountAndres.textContent = String(
+          parseBeerCount(localStorage.getItem(BEER_ANDRES_STORAGE_KEY))
+        );
+        beerCountClaudia.textContent = String(
+          parseBeerCount(localStorage.getItem(BEER_CLAUDIA_STORAGE_KEY))
+        );
+      }
+
+      function incrementBeer(storageKey) {
+        const current = parseBeerCount(localStorage.getItem(storageKey));
+        const next = current + 1;
+        localStorage.setItem(storageKey, String(next));
+        renderBeerCounts();
+      }
+
       async function loadMood() {
         const { data, error } = await supabaseClient
           .from(MOODS_TABLE)
@@ -1201,6 +1279,12 @@
         if (moodReasonSaveTimer) clearTimeout(moodReasonSaveTimer);
         await saveMoodReason(moodReason.value);
       });
+      beerBtnAndres.addEventListener("click", () => {
+        incrementBeer(BEER_ANDRES_STORAGE_KEY);
+      });
+      beerBtnClaudia.addEventListener("click", () => {
+        incrementBeer(BEER_CLAUDIA_STORAGE_KEY);
+      });
 
       function subscribeRealtime() {
         supabaseClient
@@ -1255,6 +1339,7 @@
         await loadMovies();
         await loadThoughts();
         await loadMood();
+        renderBeerCounts();
         subscribeRealtime();
         unregisterServiceWorkers();
         showStatus(
@@ -1277,6 +1362,7 @@
         msg.style.display = "block";
         img.style.display = "block";
         countdown.style.display = "block";
+        moodCard.style.display = "none";
         btn.style.display = "none";
 
         // Fecha objetivo: hoy a las 23:45 (hora local)
