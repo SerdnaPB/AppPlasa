@@ -91,9 +91,7 @@
         z-index: 25;
         width: min(340px, 86vw);
         height: 100vh;
-        overflow: hidden;
-        display: flex;
-        flex-direction: column;
+        overflow-y: auto;
         padding: 68px 14px 14px;
         border-radius: 0 16px 16px 0;
         background-image: linear-gradient(
@@ -124,9 +122,7 @@
         z-index: 25;
         width: min(340px, 86vw);
         height: 100vh;
-        overflow: hidden;
-        display: flex;
-        flex-direction: column;
+        overflow-y: auto;
         padding: 68px 14px 14px;
         border-radius: 16px 0 0 16px;
         background-image: linear-gradient(
@@ -175,8 +171,7 @@
         display: grid;
         gap: 8px;
         overflow-y: auto;
-        flex: 1;
-        min-height: 0;
+        max-height: 38vh;
       }
       .movie-item {
         display: grid;
@@ -265,8 +260,7 @@
         display: grid;
         gap: 8px;
         overflow-y: auto;
-        flex: 1;
-        min-height: 0;
+        max-height: 42vh;
       }
       .thought-item {
         background: rgba(15, 23, 42, 0.22);
