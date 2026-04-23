@@ -511,19 +511,6 @@
         <button id="randomMovieBtn" type="button">Elegir película aleatoria</button>
         <p id="randomMovieMessage" class="movie-random-message"></p>
       </div>
-      <div class="beer-score">
-        <p class="beer-score-title">Competición de cervezas 🍺</p>
-        <div class="beer-row">
-          <span class="beer-name">Andrés</span>
-          <span id="beerCountAndres" class="beer-count">0</span>
-          <button id="beerBtnAndres" class="beer-btn" type="button">+1</button>
-        </div>
-        <div class="beer-row">
-          <span class="beer-name">Claudia</span>
-          <span id="beerCountClaudia" class="beer-count">0</span>
-          <button id="beerBtnClaudia" class="beer-btn" type="button">+1</button>
-        </div>
-      </div>
     </aside>
     <aside id="thoughtMenu" class="thought-menu">
       <h3 class="thoughts-title">Pensamientos introspectivos</h3>
@@ -541,6 +528,19 @@
       <ul id="thoughtList" class="thoughts-list"></ul>
     </aside>
     <div class="wrap">
+      <div class="beer-score">
+        <p class="beer-score-title">Competición de cervezas 🍺</p>
+        <div class="beer-row">
+          <span class="beer-name">Andrés</span>
+          <span class="beer-count" data-player="andres">0</span>
+          <button class="beer-btn" data-player="andres" type="button">+1</button>
+        </div>
+        <div class="beer-row">
+          <span class="beer-name">Claudia</span>
+          <span class="beer-count" data-player="claudia">0</span>
+          <button class="beer-btn" data-player="claudia" type="button">+1</button>
+        </div>
+      </div>
       <button id="btn">Clica para recibir un Abrasito⭐</button>
       <div class="mood-card">
         <p class="mood-title">¿Cómo te sientes hoy?</p>
@@ -599,10 +599,8 @@
       const moodSelected = document.getElementById("moodSelected");
       const moodReason = document.getElementById("moodReason");
       const moodCard = document.querySelector(".mood-card");
-      const beerBtnAndres = document.getElementById("beerBtnAndres");
-      const beerBtnClaudia = document.getElementById("beerBtnClaudia");
-      const beerCountAndres = document.getElementById("beerCountAndres");
-      const beerCountClaudia = document.getElementById("beerCountClaudia");
+      const beerButtons = document.querySelectorAll(".beer-btn[data-player]");
+      const beerCounters = document.querySelectorAll(".beer-count[data-player]");
       const syncStatus = document.getElementById("syncStatus");
       let countdownTimer = null;
 
@@ -1068,15 +1066,21 @@
       }
 
       function renderBeerCounts() {
-        beerCountAndres.textContent = String(
+        const andresCount = String(
           parseBeerCount(localStorage.getItem(BEER_ANDRES_STORAGE_KEY))
         );
-        beerCountClaudia.textContent = String(
+        const claudiaCount = String(
           parseBeerCount(localStorage.getItem(BEER_CLAUDIA_STORAGE_KEY))
         );
+        beerCounters.forEach((counter) => {
+          const player = counter.dataset.player;
+          counter.textContent = player === "andres" ? andresCount : claudiaCount;
+        });
       }
 
-      function incrementBeer(storageKey) {
+      function incrementBeer(player) {
+        const storageKey =
+          player === "andres" ? BEER_ANDRES_STORAGE_KEY : BEER_CLAUDIA_STORAGE_KEY;
         const current = parseBeerCount(localStorage.getItem(storageKey));
         const next = current + 1;
         localStorage.setItem(storageKey, String(next));
@@ -1273,11 +1277,10 @@
         if (moodReasonSaveTimer) clearTimeout(moodReasonSaveTimer);
         await saveMoodReason(moodReason.value);
       });
-      beerBtnAndres.addEventListener("click", () => {
-        incrementBeer(BEER_ANDRES_STORAGE_KEY);
-      });
-      beerBtnClaudia.addEventListener("click", () => {
-        incrementBeer(BEER_CLAUDIA_STORAGE_KEY);
+      beerButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          incrementBeer(button.dataset.player);
+        });
       });
 
       function subscribeRealtime() {
