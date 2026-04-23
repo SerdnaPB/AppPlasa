@@ -4,12 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="theme-color" content="#0b1220" />
-    <meta name="mobile-web-app-capable" content="yes" />
     <meta name="application-name" content="Abrasito" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="Abrasito de Andres" />
-    <link rel="manifest" href="/AppPlasa/manifest.webmanifest" />
     <link rel="icon" type="image/x-icon" href="/AppPlasa/favicon.ico" />
     <link rel="shortcut icon" href="/AppPlasa/favicon.ico" />
     <link rel="icon" type="image/png" sizes="16x16" href="/AppPlasa/favicon-16x16.png" />
@@ -1242,15 +1237,14 @@
           .subscribe();
       }
 
-      function registerServiceWorker() {
+      function unregisterServiceWorkers() {
         if (!("serviceWorker" in navigator)) return;
-        window.addEventListener("load", () => {
-          navigator.serviceWorker
-            .register("/AppPlasa/sw.js")
-            .catch((error) =>
-              console.error("No se pudo registrar el service worker:", error)
-            );
-        });
+        navigator.serviceWorker
+          .getRegistrations()
+          .then((registrations) => {
+            registrations.forEach((registration) => registration.unregister());
+          })
+          .catch(() => {});
       }
 
       // Fuerza estado inicial consistente en primera carga.
@@ -1262,7 +1256,7 @@
         await loadThoughts();
         await loadMood();
         subscribeRealtime();
-        registerServiceWorker();
+        unregisterServiceWorkers();
         showStatus(
           `Conectado a Supabase (${MOVIES_TABLE} / ${THOUGHTS_TABLE} / ${MOODS_TABLE}).`
         );
@@ -1285,8 +1279,10 @@
         countdown.style.display = "block";
         btn.style.display = "none";
 
-        // Fecha objetivo: jueves 21 de mayo de 2026 a las 22:00 (hora local)
-        const endTime = new Date(2026, 4, 21, 22, 0, 0).getTime();
+        // Fecha objetivo: hoy a las 23:45 (hora local)
+        const target = new Date();
+        target.setHours(23, 45, 0, 0);
+        const endTime = target.getTime();
         countdownValue.textContent = formatRemaining(endTime - Date.now());
 
         if (countdownTimer) clearInterval(countdownTimer);
@@ -1305,4 +1301,3 @@
     </script>
   </body>
 </html>
-
