@@ -722,11 +722,13 @@
         menuBackdrop.classList.remove("open");
       }
 
-      function openThoughtMenu() {
+      async function openThoughtMenu() {
         closeMovieMenu();
         thoughtMenu.classList.add("open");
         thoughtBackdrop.classList.add("open");
         document.body.classList.add("thought-focus");
+        await loadThoughts();
+        thoughtList.scrollTop = 0;
         markThoughtsAsSeenByOther();
       }
 
@@ -752,7 +754,7 @@
         if (thoughtMenu.classList.contains("open")) {
           closeThoughtMenu();
         } else {
-          openThoughtMenu();
+          void openThoughtMenu();
         }
       }
 
