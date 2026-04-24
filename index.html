@@ -663,7 +663,6 @@
       let statusTimer = null;
       let moodReasonSaveTimer = null;
       let thoughtsSupportsReadReceipts = true;
-      let ignoreClickUntil = 0;
       const CLIENT_ID = (() => {
         const existingId = localStorage.getItem(CLIENT_ID_STORAGE_KEY);
         if (existingId) return existingId;
@@ -738,10 +737,6 @@
       }
 
       function toggleMovieMenu(event) {
-        if (event.type === "click" && Date.now() < ignoreClickUntil) return;
-        if (event.type === "touchend") {
-          ignoreClickUntil = Date.now() + 450;
-        }
         event.stopPropagation();
         event.preventDefault();
         if (movieMenu.classList.contains("open")) {
@@ -752,10 +747,6 @@
       }
 
       function toggleThoughtMenu(event) {
-        if (event.type === "click" && Date.now() < ignoreClickUntil) return;
-        if (event.type === "touchend") {
-          ignoreClickUntil = Date.now() + 450;
-        }
         event.stopPropagation();
         event.preventDefault();
         if (thoughtMenu.classList.contains("open")) {
@@ -765,11 +756,8 @@
         }
       }
 
-      menuToggle.addEventListener("click", toggleMovieMenu);
-      thoughtToggle.addEventListener("click", toggleThoughtMenu);
-      // Respaldo para algunos navegadores móviles donde el primer click falla.
-      menuToggle.addEventListener("touchend", toggleMovieMenu, { passive: false });
-      thoughtToggle.addEventListener("touchend", toggleThoughtMenu, { passive: false });
+      menuToggle.addEventListener("pointerup", toggleMovieMenu);
+      thoughtToggle.addEventListener("pointerup", toggleThoughtMenu);
 
       menuBackdrop.addEventListener("click", (event) => {
         event.stopPropagation();
