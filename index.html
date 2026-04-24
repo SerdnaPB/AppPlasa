@@ -35,15 +35,14 @@
         display: grid;
         gap: 18px;
         justify-items: center;
-        transition: opacity 160ms ease, filter 160ms ease;
+        transition: opacity 140ms ease;
       }
       body.thought-focus .wrap {
-        opacity: 0.2;
-        filter: blur(2px);
+        opacity: 0.35;
         pointer-events: none;
       }
       body.thought-focus .beer-score {
-        visibility: hidden;
+        opacity: 0.15;
       }
       #btn {
         width: min(560px, 92vw);
@@ -664,6 +663,7 @@
       let statusTimer = null;
       let moodReasonSaveTimer = null;
       let thoughtsSupportsReadReceipts = true;
+      let ignoreClickUntil = 0;
       const CLIENT_ID = (() => {
         const existingId = localStorage.getItem(CLIENT_ID_STORAGE_KEY);
         if (existingId) return existingId;
@@ -738,6 +738,10 @@
       }
 
       function toggleMovieMenu(event) {
+        if (event.type === "click" && Date.now() < ignoreClickUntil) return;
+        if (event.type === "touchend") {
+          ignoreClickUntil = Date.now() + 450;
+        }
         event.stopPropagation();
         event.preventDefault();
         if (movieMenu.classList.contains("open")) {
@@ -748,6 +752,10 @@
       }
 
       function toggleThoughtMenu(event) {
+        if (event.type === "click" && Date.now() < ignoreClickUntil) return;
+        if (event.type === "touchend") {
+          ignoreClickUntil = Date.now() + 450;
+        }
         event.stopPropagation();
         event.preventDefault();
         if (thoughtMenu.classList.contains("open")) {
