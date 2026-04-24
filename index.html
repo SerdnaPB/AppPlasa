@@ -35,6 +35,15 @@
         display: grid;
         gap: 18px;
         justify-items: center;
+        transition: opacity 160ms ease, filter 160ms ease;
+      }
+      body.thought-focus .wrap {
+        opacity: 0.2;
+        filter: blur(2px);
+        pointer-events: none;
+      }
+      body.thought-focus .beer-score {
+        visibility: hidden;
       }
       #btn {
         width: min(560px, 92vw);
@@ -704,6 +713,7 @@
       }
 
       function openMovieMenu() {
+        closeThoughtMenu();
         movieMenu.classList.add("open");
         menuBackdrop.classList.add("open");
       }
@@ -714,14 +724,17 @@
       }
 
       function openThoughtMenu() {
+        closeMovieMenu();
         thoughtMenu.classList.add("open");
         thoughtBackdrop.classList.add("open");
+        document.body.classList.add("thought-focus");
         markThoughtsAsSeenByOther();
       }
 
       function closeThoughtMenu() {
         thoughtMenu.classList.remove("open");
         thoughtBackdrop.classList.remove("open");
+        document.body.classList.remove("thought-focus");
       }
 
       function toggleMovieMenu(event) {
