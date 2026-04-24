@@ -41,9 +41,6 @@
         opacity: 0.35;
         pointer-events: none;
       }
-      body.thought-focus .beer-score {
-        opacity: 0.15;
-      }
       #btn {
         width: min(560px, 92vw);
         min-height: 120px;
@@ -321,67 +318,6 @@
         font-size: 14px;
         font-weight: 700;
       }
-      .beer-score {
-        width: min(560px, 92vw);
-        margin-top: 4px;
-        padding: 12px 12px;
-        display: grid;
-        gap: 8px;
-        background: rgba(15, 23, 42, 0.38);
-        border: 1px solid rgba(148, 163, 184, 0.45);
-        border-radius: 14px;
-        color: #f8fafc;
-        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
-        backdrop-filter: blur(6px);
-      }
-      .beer-score-title {
-        margin: 0;
-        font-size: 15px;
-        font-weight: 800;
-        text-align: center;
-      }
-      .beer-row {
-        display: grid;
-        grid-template-columns: 1fr auto auto;
-        gap: 8px;
-        align-items: center;
-        background: rgba(15, 23, 42, 0.26);
-        border-radius: 10px;
-        padding: 8px 10px;
-        border: 1px solid rgba(148, 163, 184, 0.28);
-        transition: transform 120ms ease, border-color 120ms ease,
-          background-color 120ms ease;
-      }
-      .beer-row.leader {
-        background: rgba(250, 204, 21, 0.2);
-        border-color: rgba(250, 204, 21, 0.75);
-        transform: scale(1.01);
-      }
-      .beer-name {
-        font-weight: 700;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-      }
-      .leader-crown {
-        display: none;
-      }
-      .beer-row.leader .leader-crown {
-        display: inline;
-      }
-      .beer-count {
-        font-weight: 900;
-        font-size: 20px;
-      }
-      .beer-btn {
-        border: 0;
-        border-radius: 8px;
-        padding: 6px 10px;
-        font-weight: 800;
-        cursor: pointer;
-        background: rgba(34, 197, 94, 0.72);
-        color: #052e16;
-      }
       .mood-card {
         width: min(560px, 92vw);
         border-radius: 16px;
@@ -560,19 +496,6 @@
       <ul id="thoughtList" class="thoughts-list"></ul>
     </aside>
     <div class="wrap">
-      <div class="beer-score">
-        <p class="beer-score-title">Competición de cervezas 🍺</p>
-        <div class="beer-row" data-player-row="andres">
-          <span class="beer-name">Andrés <span class="leader-crown">👑</span></span>
-          <span class="beer-count" data-player="andres">0</span>
-          <button class="beer-btn" data-player="andres" type="button">+1</button>
-        </div>
-        <div class="beer-row" data-player-row="claudia">
-          <span class="beer-name">Claudia <span class="leader-crown">👑</span></span>
-          <span class="beer-count" data-player="claudia">0</span>
-          <button class="beer-btn" data-player="claudia" type="button">+1</button>
-        </div>
-      </div>
       <button id="btn">Clica para recibir un Abrasito⭐</button>
       <div class="mood-card">
         <p class="mood-title">¿Cómo te sientes hoy?</p>
@@ -631,9 +554,6 @@
       const moodSelected = document.getElementById("moodSelected");
       const moodReason = document.getElementById("moodReason");
       const moodCard = document.querySelector(".mood-card");
-      const beerButtons = document.querySelectorAll(".beer-btn[data-player]");
-      const beerCounters = document.querySelectorAll(".beer-count[data-player]");
-      const beerRows = document.querySelectorAll(".beer-row[data-player-row]");
       const syncStatus = document.getElementById("syncStatus");
       let countdownTimer = null;
 
@@ -656,8 +576,6 @@
       let thoughts = [];
       const MOOD_STORAGE_KEY = "currentMood";
       const MOOD_REASON_STORAGE_KEY = "currentMoodReason";
-      const BEER_ANDRES_STORAGE_KEY = "beerCountAndres";
-      const BEER_CLAUDIA_STORAGE_KEY = "beerCountClaudia";
       const MOOD_ROW_ID = 1;
       const CLIENT_ID_STORAGE_KEY = "thoughtClientId";
       let statusTimer = null;
@@ -1096,41 +1014,6 @@
         }
       }
 
-      function parseBeerCount(value) {
-        const parsed = Number.parseInt(value, 10);
-        return Number.isFinite(parsed) && parsed >= 0 ? parsed : 0;
-      }
-
-      function renderBeerCounts() {
-        const andresValue = parseBeerCount(localStorage.getItem(BEER_ANDRES_STORAGE_KEY));
-        const claudiaValue = parseBeerCount(
-          localStorage.getItem(BEER_CLAUDIA_STORAGE_KEY)
-        );
-        const andresCount = String(andresValue);
-        const claudiaCount = String(claudiaValue);
-        beerCounters.forEach((counter) => {
-          const player = counter.dataset.player;
-          counter.textContent = player === "andres" ? andresCount : claudiaCount;
-        });
-        beerRows.forEach((row) => row.classList.remove("leader"));
-        if (andresValue === claudiaValue) return;
-        const leader = andresValue > claudiaValue ? "andres" : "claudia";
-        beerRows.forEach((row) => {
-          if (row.dataset.playerRow === leader) {
-            row.classList.add("leader");
-          }
-        });
-      }
-
-      function incrementBeer(player) {
-        const storageKey =
-          player === "andres" ? BEER_ANDRES_STORAGE_KEY : BEER_CLAUDIA_STORAGE_KEY;
-        const current = parseBeerCount(localStorage.getItem(storageKey));
-        const next = current + 1;
-        localStorage.setItem(storageKey, String(next));
-        renderBeerCounts();
-      }
-
       async function loadMood() {
         const { data, error } = await supabaseClient
           .from(MOODS_TABLE)
@@ -1321,12 +1204,6 @@
         if (moodReasonSaveTimer) clearTimeout(moodReasonSaveTimer);
         await saveMoodReason(moodReason.value);
       });
-      beerButtons.forEach((button) => {
-        button.addEventListener("click", () => {
-          incrementBeer(button.dataset.player);
-        });
-      });
-
       function subscribeRealtime() {
         supabaseClient
           .channel("movies-changes")
@@ -1380,7 +1257,6 @@
         await loadMovies();
         await loadThoughts();
         await loadMood();
-        renderBeerCounts();
         subscribeRealtime();
         unregisterServiceWorkers();
         showStatus(
