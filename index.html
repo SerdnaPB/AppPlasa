@@ -35,11 +35,6 @@
         display: grid;
         gap: 18px;
         justify-items: center;
-        transition: opacity 140ms ease;
-      }
-      body.thought-focus .wrap {
-        opacity: 0.35;
-        pointer-events: none;
       }
       #btn {
         width: min(560px, 92vw);
@@ -89,15 +84,21 @@
       .menu-backdrop.open {
         display: block;
       }
-      .movie-menu {
+      .movie-menu,
+      .plan-menu {
         position: fixed;
         top: 0;
-        left: 0;
         z-index: 25;
         width: min(340px, 86vw);
         height: 100vh;
         overflow-y: auto;
         padding: 68px 14px 14px;
+        box-shadow: 0 14px 34px rgba(0, 0, 0, 0.35);
+        color: #f8fafc;
+        transition: transform 180ms ease;
+      }
+      .movie-menu {
+        left: 0;
         border-radius: 0 16px 16px 0;
         background-image: linear-gradient(
             rgba(17, 24, 39, 0.45),
@@ -108,27 +109,10 @@
         background-position: center;
         background-repeat: no-repeat;
         border-right: 1px solid rgba(167, 139, 250, 0.5);
-        box-shadow: 0 14px 34px rgba(0, 0, 0, 0.35);
-        color: #f8fafc;
         transform: translateX(-105%);
-        transition: transform 180ms ease;
       }
-      .movie-menu.open {
-        transform: translateX(0);
-      }
-      .movie-menu h3 {
-        margin: 0 0 10px;
-        font-size: clamp(16px, 3vw, 22px);
-      }
-      .thought-menu {
-        position: fixed;
-        top: 0;
+      .plan-menu {
         right: 0;
-        z-index: 25;
-        width: min(340px, 86vw);
-        height: 100vh;
-        overflow-y: auto;
-        padding: 68px 14px 14px;
         border-radius: 16px 0 0 16px;
         background-image: linear-gradient(
             rgba(2, 6, 23, 0.5),
@@ -139,28 +123,34 @@
         background-position: center 100%;
         background-repeat: no-repeat;
         border-left: 1px solid rgba(167, 139, 250, 0.5);
-        box-shadow: 0 14px 34px rgba(0, 0, 0, 0.35);
-        color: #f8fafc;
         transform: translateX(105%);
-        transition: transform 180ms ease;
       }
-      .thought-menu.open {
+      .movie-menu.open,
+      .plan-menu.open {
         transform: translateX(0);
       }
-      .movie-input-row {
+      .movie-menu h3,
+      .plan-menu h3 {
+        margin: 0 0 10px;
+        font-size: clamp(16px, 3vw, 22px);
+      }
+      .movie-input-row,
+      .plan-input-row {
         display: grid;
         grid-template-columns: 1fr auto;
         gap: 8px;
         margin-bottom: 10px;
       }
-      .movie-input-row input {
+      .movie-input-row input,
+      .plan-input-row input {
         border: 1px solid rgba(167, 139, 250, 0.55);
         border-radius: 10px;
         padding: 10px 12px;
         background: rgba(248, 250, 252, 0.86);
         color: #111827;
       }
-      .movie-input-row button {
+      .movie-input-row button,
+      .plan-input-row button {
         border: 0;
         border-radius: 10px;
         padding: 10px 12px;
@@ -169,7 +159,8 @@
         background: #a78bfa;
         color: #111827;
       }
-      .movie-list {
+      .movie-list,
+      .plan-list {
         list-style: none;
         margin: 0;
         padding: 0;
@@ -178,7 +169,8 @@
         overflow-y: auto;
         max-height: 38vh;
       }
-      .movie-item {
+      .movie-item,
+      .plan-item {
         display: grid;
         grid-template-columns: 1fr auto;
         gap: 8px;
@@ -191,35 +183,17 @@
         touch-action: pan-y;
       }
       .movie-item.swiping-edit,
+      .plan-item.swiping-edit,
       .thought-item.swiping-edit {
         background: rgba(34, 197, 94, 0.3);
       }
       .movie-item.swiping-delete,
+      .plan-item.swiping-delete,
       .thought-item.swiping-delete {
         background: rgba(239, 68, 68, 0.3);
       }
-      .entry-actions {
-        display: inline-flex;
-        gap: 6px;
-      }
-      .entry-actions button {
-        border: 0;
-        border-radius: 8px;
-        padding: 6px 8px;
-        font-size: 12px;
-        font-weight: 700;
-        cursor: pointer;
-        backdrop-filter: blur(2px);
-      }
-      .btn-edit {
-        background: rgba(147, 197, 253, 0.62);
-        color: #082f49;
-      }
-      .btn-delete {
-        background: rgba(252, 165, 165, 0.62);
-        color: #7f1d1d;
-      }
-      .movie-item.seen .movie-title {
+      .movie-item.seen .movie-title,
+      .plan-item.done .plan-title {
         text-decoration: line-through;
         opacity: 0.75;
       }
@@ -228,54 +202,6 @@
         gap: 6px;
         align-items: center;
         font-size: 13px;
-      }
-      .thoughts-title {
-        margin: 0 0 10px;
-        font-size: clamp(14px, 2.6vw, 18px);
-        line-height: 1.3;
-      }
-      .thoughts-input-row {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 8px;
-        margin-bottom: 10px;
-      }
-      .thoughts-input-row textarea {
-        border: 1px solid rgba(167, 139, 250, 0.55);
-        border-radius: 10px;
-        padding: 10px 12px;
-        background: rgba(248, 250, 252, 0.44);
-        color: #111827;
-        resize: vertical;
-        min-height: 86px;
-      }
-      .thoughts-input-row button {
-        border: 0;
-        border-radius: 10px;
-        padding: 10px 12px;
-        font-weight: 700;
-        cursor: pointer;
-        background: rgba(34, 197, 94, 0.58);
-        color: #111827;
-      }
-      .thoughts-list {
-        list-style: none;
-        margin: 0;
-        padding: 0;
-        display: grid;
-        gap: 8px;
-        overflow-y: auto;
-        max-height: 42vh;
-      }
-      .thought-item {
-        background: rgba(15, 23, 42, 0.22);
-        backdrop-filter: blur(3px);
-        border-radius: 10px;
-        padding: 8px 10px;
-        line-height: 1.35;
-        word-break: break-word;
-        transition: transform 140ms ease, background-color 140ms ease;
-        touch-action: pan-y;
       }
       .swipe-hint {
         margin: 0 0 10px;
@@ -286,17 +212,6 @@
         border: 1px solid rgba(248, 250, 252, 0.35);
         border-radius: 8px;
         padding: 7px 8px;
-      }
-      .thought-item-top {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 8px;
-        align-items: start;
-      }
-      .thought-item-meta {
-        margin-top: 6px;
-        font-size: 12px;
-        opacity: 0.8;
       }
       .movie-random {
         margin-top: 12px;
@@ -364,6 +279,23 @@
         min-height: 74px;
         box-sizing: border-box;
       }
+      .notify-btn {
+        width: min(560px, 92vw);
+        border: 0;
+        border-radius: 16px;
+        padding: 14px 18px;
+        font-size: clamp(16px, 3vw, 22px);
+        font-weight: 800;
+        cursor: pointer;
+        background: linear-gradient(135deg, #ef4444, #b91c1c);
+        color: #fff7ed;
+        box-shadow: 0 14px 34px rgba(220, 38, 38, 0.45);
+        transition: transform 120ms ease, filter 120ms ease;
+      }
+      .notify-btn:active {
+        transform: translateY(1px) scale(0.99);
+        filter: brightness(0.95);
+      }
       .sync-status {
         position: fixed;
         bottom: 12px;
@@ -382,23 +314,22 @@
         display: block;
       }
       @media (max-width: 860px) {
-        .movie-menu {
-          width: min(360px, 92vw);
-        }
-        .thought-menu {
+        .movie-menu,
+        .plan-menu {
           width: min(360px, 92vw);
         }
       }
-      img {
+      .abrasito-area {
         display: none;
-        width: min(560px, 92vw);
-        height: auto;
-        border-radius: 18px;
-        box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+        width: min(900px, 96vw);
+        gap: 14px;
+        grid-template-columns: 1fr;
+      }
+      .abrasito-area.show {
+        display: grid;
       }
       .countdown {
-        display: none;
-        width: min(560px, 92vw);
+        width: 100%;
         text-align: center;
         color: #f5f3ff;
         background: rgba(30, 41, 59, 0.5);
@@ -406,6 +337,7 @@
         border-radius: 16px;
         padding: 16px 14px;
         box-shadow: 0 14px 36px rgba(0, 0, 0, 0.3);
+        box-sizing: border-box;
       }
       .countdown-title {
         margin: 0 0 8px;
@@ -418,23 +350,88 @@
         font-weight: 900;
         letter-spacing: 0.5px;
       }
-      .top-message {
-        position: fixed;
-        top: 18px;
-        left: 50%;
-        transform: translateX(-50%);
-        display: none;
-        width: min(720px, 92vw);
-        padding: 18px 18px;
-        text-align: center;
-        font-size: clamp(26px, 6vw, 44px);
-        font-weight: 900;
-        color: #f5f3ff;
-        background: rgba(124, 58, 237, 0.22);
-        border: 1px solid rgba(196, 181, 253, 0.35);
+      .thoughts-with-image {
+        display: grid;
+        grid-template-columns: 1fr 220px;
+        gap: 16px;
+        align-items: start;
+      }
+      @media (max-width: 720px) {
+        .thoughts-with-image {
+          grid-template-columns: 1fr;
+        }
+      }
+      .thoughts-card {
         border-radius: 16px;
-        backdrop-filter: blur(10px);
-        box-shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+        padding: 14px;
+        background: rgba(2, 6, 23, 0.5);
+        border: 1px solid rgba(167, 139, 250, 0.45);
+        color: #f8fafc;
+        box-sizing: border-box;
+      }
+      .thoughts-card h3 {
+        margin: 0 0 10px;
+        font-size: clamp(16px, 3vw, 22px);
+      }
+      .thoughts-input-row {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 8px;
+        margin-bottom: 10px;
+      }
+      .thoughts-input-row textarea {
+        border: 1px solid rgba(167, 139, 250, 0.55);
+        border-radius: 10px;
+        padding: 10px 12px;
+        background: rgba(248, 250, 252, 0.44);
+        color: #111827;
+        resize: vertical;
+        min-height: 86px;
+      }
+      .thoughts-input-row button {
+        border: 0;
+        border-radius: 10px;
+        padding: 10px 12px;
+        font-weight: 700;
+        cursor: pointer;
+        background: rgba(34, 197, 94, 0.58);
+        color: #111827;
+      }
+      .thoughts-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        gap: 8px;
+        overflow-y: auto;
+        max-height: 42vh;
+      }
+      .thought-item {
+        background: rgba(15, 23, 42, 0.42);
+        border-radius: 10px;
+        padding: 8px 10px;
+        line-height: 1.35;
+        word-break: break-word;
+        transition: transform 140ms ease, background-color 140ms ease;
+        touch-action: pan-y;
+      }
+      .thought-item-meta {
+        margin-top: 6px;
+        font-size: 12px;
+        opacity: 0.8;
+      }
+      .flork-img {
+        width: 100%;
+        max-width: 220px;
+        height: auto;
+        border-radius: 18px;
+        box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+        justify-self: center;
+      }
+      @media (max-width: 720px) {
+        .flork-img {
+          max-width: 200px;
+        }
       }
     </style>
   </head>
@@ -443,17 +440,16 @@
       ☰
     </button>
     <button
-      id="thoughtToggle"
+      id="planToggle"
       class="menu-toggle menu-toggle-right"
       type="button"
-      aria-label="Abrir pensamientos"
+      aria-label="Abrir planes"
     >
-      📝 Pens.
+      📅 Planes
     </button>
     <div id="menuBackdrop" class="menu-backdrop"></div>
-    <div id="thoughtBackdrop" class="menu-backdrop"></div>
+    <div id="planBackdrop" class="menu-backdrop"></div>
     <div id="syncStatus" class="sync-status"></div>
-    <div id="msg" class="top-message">Que pases un precioso(como tú) día💜🧸</div>
     <aside id="movieMenu" class="movie-menu">
       <h3>Películas para ver</h3>
       <p class="swipe-hint">
@@ -474,24 +470,25 @@
         <p id="randomMovieMessage" class="movie-random-message"></p>
       </div>
     </aside>
-    <aside id="thoughtMenu" class="thought-menu">
-      <h3 class="thoughts-title">Pensamientos introspectivos</h3>
+    <aside id="planMenu" class="plan-menu">
+      <h3>Planes que hacer</h3>
       <p class="swipe-hint">
-        Desliza cada pensamiento: derecha para editar, izquierda para borrar.
+        Desliza cada plan: derecha para editar, izquierda para borrar.
       </p>
-      <div class="thoughts-input-row">
-        <textarea
-          id="thoughtInput"
-          placeholder="Escribe un pensamiento con detalle..."
-          maxlength="500"
-        ></textarea>
-        <button id="addThoughtBtn" type="button">Guardar</button>
+      <div class="plan-input-row">
+        <input
+          id="planInput"
+          type="text"
+          placeholder="Añade un plan..."
+          maxlength="120"
+        />
+        <button id="addPlanBtn" type="button">Añadir</button>
       </div>
-      <ul id="thoughtList" class="thoughts-list"></ul>
+      <ul id="planList" class="plan-list"></ul>
     </aside>
     <div class="wrap">
       <button id="btn">Clica para recibir un Abrasito⭐</button>
-      <div class="mood-card">
+      <div class="mood-card" id="moodCard">
         <p class="mood-title">¿Cómo te sientes hoy?</p>
         <div class="mood-slider-wrap">
           <input
@@ -516,38 +513,61 @@
           maxlength="280"
         ></textarea>
       </div>
-      <img id="flork" src="./Florkyflor.png" alt="Flork" />
-      <div id="countdown" class="countdown">
-        <p class="countdown-title">Tiempo para vernos (como máx)</p>
-        <p id="countdownValue" class="countdown-value">42d 00h 00m 00s</p>
+      <button id="notifyBtn" class="notify-btn" type="button">Notificar 🔔</button>
+      <div id="abrasitoArea" class="abrasito-area">
+        <div id="countdown" class="countdown">
+          <p class="countdown-title">Tiempo para vernos (como máx)</p>
+          <p id="countdownValue" class="countdown-value">— d 00h 00m 00s</p>
+        </div>
+        <div class="thoughts-with-image">
+          <div class="thoughts-card">
+            <h3>Pensamientos introspectivos</h3>
+            <p class="swipe-hint">
+              Desliza cada pensamiento: derecha para editar, izquierda para borrar.
+            </p>
+            <div class="thoughts-input-row">
+              <textarea
+                id="thoughtInput"
+                placeholder="Escribe un pensamiento con detalle..."
+                maxlength="500"
+              ></textarea>
+              <button id="addThoughtBtn" type="button">Guardar</button>
+            </div>
+            <ul id="thoughtList" class="thoughts-list"></ul>
+          </div>
+          <img id="flork" class="flork-img" src="./Florkyflor.png" alt="Flork" />
+        </div>
       </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
       const btn = document.getElementById("btn");
-      const img = document.getElementById("flork");
-      const msg = document.getElementById("msg");
       const countdown = document.getElementById("countdown");
       const countdownValue = document.getElementById("countdownValue");
       const menuToggle = document.getElementById("menuToggle");
-      const thoughtToggle = document.getElementById("thoughtToggle");
+      const planToggle = document.getElementById("planToggle");
       const menuBackdrop = document.getElementById("menuBackdrop");
-      const thoughtBackdrop = document.getElementById("thoughtBackdrop");
+      const planBackdrop = document.getElementById("planBackdrop");
       const movieMenu = document.getElementById("movieMenu");
-      const thoughtMenu = document.getElementById("thoughtMenu");
+      const planMenu = document.getElementById("planMenu");
       const movieInput = document.getElementById("movieInput");
       const addMovieBtn = document.getElementById("addMovieBtn");
       const movieList = document.getElementById("movieList");
       const randomMovieBtn = document.getElementById("randomMovieBtn");
       const randomMovieMessage = document.getElementById("randomMovieMessage");
+      const planInput = document.getElementById("planInput");
+      const addPlanBtn = document.getElementById("addPlanBtn");
+      const planList = document.getElementById("planList");
       const thoughtInput = document.getElementById("thoughtInput");
       const addThoughtBtn = document.getElementById("addThoughtBtn");
       const thoughtList = document.getElementById("thoughtList");
       const moodSlider = document.getElementById("moodSlider");
       const moodSelected = document.getElementById("moodSelected");
       const moodReason = document.getElementById("moodReason");
-      const moodCard = document.querySelector(".mood-card");
+      const moodCard = document.getElementById("moodCard");
+      const notifyBtn = document.getElementById("notifyBtn");
+      const abrasitoArea = document.getElementById("abrasitoArea");
       const syncStatus = document.getElementById("syncStatus");
       let countdownTimer = null;
 
@@ -562,9 +582,14 @@
       const MOVIES_TABLE = "movies";
       const THOUGHTS_TABLE = "thoughts";
       const MOODS_TABLE = "moods";
+      const PLANS_TABLE = "plans";
+
+      // Fecha objetivo del countdown: 21 de mayo de 2026 a las 22:00 (hora local).
+      const COUNTDOWN_TARGET = new Date(2026, 4, 21, 22, 0, 0, 0).getTime();
 
       let movies = [];
       let thoughts = [];
+      let plans = [];
       const MOOD_STORAGE_KEY = "currentMood";
       const MOOD_REASON_STORAGE_KEY = "currentMoodReason";
       const MOOD_ROW_ID = 1;
@@ -603,7 +628,7 @@
       }
 
       function openMovieMenu() {
-        closeThoughtMenu();
+        closePlanMenu();
         movieMenu.classList.add("open");
         menuBackdrop.classList.add("open");
       }
@@ -613,20 +638,15 @@
         menuBackdrop.classList.remove("open");
       }
 
-      async function openThoughtMenu() {
+      function openPlanMenu() {
         closeMovieMenu();
-        thoughtMenu.classList.add("open");
-        thoughtBackdrop.classList.add("open");
-        document.body.classList.add("thought-focus");
-        await loadThoughts();
-        thoughtList.scrollTop = 0;
-        markThoughtsAsSeenByOther();
+        planMenu.classList.add("open");
+        planBackdrop.classList.add("open");
       }
 
-      function closeThoughtMenu() {
-        thoughtMenu.classList.remove("open");
-        thoughtBackdrop.classList.remove("open");
-        document.body.classList.remove("thought-focus");
+      function closePlanMenu() {
+        planMenu.classList.remove("open");
+        planBackdrop.classList.remove("open");
       }
 
       function toggleMovieMenu(event) {
@@ -639,31 +659,83 @@
         }
       }
 
-      function toggleThoughtMenu(event) {
+      function togglePlanMenu(event) {
         event.stopPropagation();
         event.preventDefault();
-        if (thoughtMenu.classList.contains("open")) {
-          closeThoughtMenu();
+        if (planMenu.classList.contains("open")) {
+          closePlanMenu();
         } else {
-          void openThoughtMenu();
+          openPlanMenu();
         }
       }
 
       menuToggle.addEventListener("pointerup", toggleMovieMenu);
-      thoughtToggle.addEventListener("pointerup", toggleThoughtMenu);
+      planToggle.addEventListener("pointerup", togglePlanMenu);
 
       menuBackdrop.addEventListener("click", (event) => {
         event.stopPropagation();
         closeMovieMenu();
       });
-      thoughtBackdrop.addEventListener("click", (event) => {
+      planBackdrop.addEventListener("click", (event) => {
         event.stopPropagation();
-        closeThoughtMenu();
+        closePlanMenu();
       });
+
+      function setupSwipeActions(item, { onEdit, onDelete }) {
+        const SWIPE_THRESHOLD = 70;
+        let startX = 0;
+        let currentX = 0;
+        let isDragging = false;
+
+        const resetVisual = () => {
+          item.style.transform = "translateX(0)";
+          item.classList.remove("swiping-edit", "swiping-delete");
+        };
+
+        item.addEventListener(
+          "touchstart",
+          (event) => {
+            if (!event.touches || event.touches.length !== 1) return;
+            startX = event.touches[0].clientX;
+            currentX = startX;
+            isDragging = true;
+          },
+          { passive: true }
+        );
+
+        item.addEventListener(
+          "touchmove",
+          (event) => {
+            if (!isDragging || !event.touches || event.touches.length !== 1) return;
+            currentX = event.touches[0].clientX;
+            const deltaX = Math.max(-90, Math.min(90, currentX - startX));
+            item.style.transform = `translateX(${deltaX}px)`;
+            item.classList.toggle("swiping-edit", deltaX > 24);
+            item.classList.toggle("swiping-delete", deltaX < -24);
+          },
+          { passive: true }
+        );
+
+        item.addEventListener("touchend", async () => {
+          if (!isDragging) return;
+          isDragging = false;
+          const deltaX = currentX - startX;
+          resetVisual();
+          if (deltaX >= SWIPE_THRESHOLD) {
+            await onEdit();
+          } else if (deltaX <= -SWIPE_THRESHOLD) {
+            await onDelete();
+          }
+        });
+
+        item.addEventListener("touchcancel", () => {
+          isDragging = false;
+          resetVisual();
+        });
+      }
 
       function renderMovies() {
         movieList.innerHTML = "";
-
         movies.forEach((movie) => {
           const item = document.createElement("li");
           item.className = `movie-item${movie.seen ? " seen" : ""}`;
@@ -674,7 +746,6 @@
               Visto
             </label>
           `;
-
           const titleEl = item.querySelector(".movie-title");
           const checkbox = item.querySelector('input[type="checkbox"]');
           titleEl.textContent = movie.title;
@@ -693,95 +764,45 @@
               showStatus(`Error actualizando película: ${error.message}`, true);
             }
           });
-          setupMovieSwipe(item, movie);
-
+          setupSwipeActions(item, {
+            onEdit: async () => {
+              const updated = window
+                .prompt("Edita el título de la película:", movie.title)
+                ?.trim();
+              if (!updated || updated === movie.title) return;
+              const { error } = await supabaseClient
+                .from(MOVIES_TABLE)
+                .update({ title: updated })
+                .eq("id", movie.id);
+              if (error) {
+                showStatus(`Error editando película: ${error.message}`, true);
+                return;
+              }
+              await loadMovies();
+              showStatus("Película editada.");
+            },
+            onDelete: async () => {
+              const ok = window.confirm(`¿Borrar "${movie.title}"?`);
+              if (!ok) return;
+              const { error } = await supabaseClient
+                .from(MOVIES_TABLE)
+                .delete()
+                .eq("id", movie.id);
+              if (error) {
+                showStatus(`Error borrando película: ${error.message}`, true);
+                return;
+              }
+              await loadMovies();
+              showStatus("Película borrada.");
+            },
+          });
           movieList.appendChild(item);
-        });
-      }
-
-      function setupMovieSwipe(item, movie) {
-        const SWIPE_THRESHOLD = 70;
-        let startX = 0;
-        let currentX = 0;
-        let isDragging = false;
-
-        const resetVisual = () => {
-          item.style.transform = "translateX(0)";
-          item.classList.remove("swiping-edit", "swiping-delete");
-        };
-
-        item.addEventListener(
-          "touchstart",
-          (event) => {
-            if (!event.touches || event.touches.length !== 1) return;
-            startX = event.touches[0].clientX;
-            currentX = startX;
-            isDragging = true;
-          },
-          { passive: true }
-        );
-
-        item.addEventListener(
-          "touchmove",
-          (event) => {
-            if (!isDragging || !event.touches || event.touches.length !== 1) return;
-            currentX = event.touches[0].clientX;
-            const deltaX = Math.max(-90, Math.min(90, currentX - startX));
-            item.style.transform = `translateX(${deltaX}px)`;
-            item.classList.toggle("swiping-edit", deltaX > 24);
-            item.classList.toggle("swiping-delete", deltaX < -24);
-          },
-          { passive: true }
-        );
-
-        item.addEventListener("touchend", async () => {
-          if (!isDragging) return;
-          isDragging = false;
-          const deltaX = currentX - startX;
-          resetVisual();
-          if (deltaX >= SWIPE_THRESHOLD) {
-            const updatedTitle = window
-              .prompt("Edita el título de la película:", movie.title)
-              ?.trim();
-            if (!updatedTitle || updatedTitle === movie.title) return;
-            const { error } = await supabaseClient
-              .from(MOVIES_TABLE)
-              .update({ title: updatedTitle })
-              .eq("id", movie.id);
-            if (error) {
-              showStatus(`Error editando película: ${error.message}`, true);
-              return;
-            }
-            await loadMovies();
-            showStatus("Película editada.");
-            return;
-          }
-          if (deltaX <= -SWIPE_THRESHOLD) {
-            const ok = window.confirm(`¿Borrar "${movie.title}"?`);
-            if (!ok) return;
-            const { error } = await supabaseClient
-              .from(MOVIES_TABLE)
-              .delete()
-              .eq("id", movie.id);
-            if (error) {
-              showStatus(`Error borrando película: ${error.message}`, true);
-              return;
-            }
-            await loadMovies();
-            showStatus("Película borrada.");
-          }
-        });
-
-        item.addEventListener("touchcancel", () => {
-          isDragging = false;
-          resetVisual();
         });
       }
 
       async function addMovie(title) {
         const cleanTitle = title.trim();
         if (!cleanTitle) return;
-
         const { error } = await supabaseClient.from(MOVIES_TABLE).insert({
           title: cleanTitle,
           seen: false,
@@ -793,14 +814,142 @@
         showStatus("Película guardada.");
       }
 
+      async function loadMovies() {
+        const { data, error } = await supabaseClient
+          .from(MOVIES_TABLE)
+          .select("id, title, seen, created_at")
+          .order("created_at", { ascending: false, nullsFirst: false })
+          .order("id", { ascending: false });
+        if (error) {
+          showStatus(`Error cargando películas: ${error.message}`, true);
+          return;
+        }
+        movies = (data || [])
+          .filter((movie) => movie && typeof movie.title === "string")
+          .map((movie) => ({
+            id: Number(movie.id),
+            title: movie.title.trim(),
+            seen: Boolean(movie.seen),
+          }))
+          .filter((movie) => movie.title.length > 0);
+        renderMovies();
+      }
+
+      function chooseRandomMovie() {
+        if (!movies.length) {
+          randomMovieMessage.textContent = "No hay películas todavía.";
+          return;
+        }
+        const pick = movies[Math.floor(Math.random() * movies.length)];
+        randomMovieMessage.textContent = `La película elegida es ${pick.title}!`;
+      }
+
+      function renderPlans() {
+        planList.innerHTML = "";
+        plans.forEach((plan) => {
+          const item = document.createElement("li");
+          item.className = `plan-item${plan.done ? " done" : ""}`;
+          item.innerHTML = `
+            <span class="plan-title"></span>
+            <label class="tick-label">
+              <input type="checkbox" />
+              Hecho
+            </label>
+          `;
+          const titleEl = item.querySelector(".plan-title");
+          const checkbox = item.querySelector('input[type="checkbox"]');
+          titleEl.textContent = plan.title;
+          checkbox.id = `planDone${plan.id}`;
+          checkbox.checked = plan.done;
+          checkbox.addEventListener("change", async () => {
+            const newDone = checkbox.checked;
+            item.classList.toggle("done", newDone);
+            const { error } = await supabaseClient
+              .from(PLANS_TABLE)
+              .update({ done: newDone })
+              .eq("id", plan.id);
+            if (error) {
+              checkbox.checked = !newDone;
+              item.classList.toggle("done", !newDone);
+              showStatus(`Error actualizando plan: ${error.message}`, true);
+            }
+          });
+          setupSwipeActions(item, {
+            onEdit: async () => {
+              const updated = window
+                .prompt("Edita el plan:", plan.title)
+                ?.trim();
+              if (!updated || updated === plan.title) return;
+              const { error } = await supabaseClient
+                .from(PLANS_TABLE)
+                .update({ title: updated })
+                .eq("id", plan.id);
+              if (error) {
+                showStatus(`Error editando plan: ${error.message}`, true);
+                return;
+              }
+              await loadPlans();
+              showStatus("Plan editado.");
+            },
+            onDelete: async () => {
+              const ok = window.confirm(`¿Borrar "${plan.title}"?`);
+              if (!ok) return;
+              const { error } = await supabaseClient
+                .from(PLANS_TABLE)
+                .delete()
+                .eq("id", plan.id);
+              if (error) {
+                showStatus(`Error borrando plan: ${error.message}`, true);
+                return;
+              }
+              await loadPlans();
+              showStatus("Plan borrado.");
+            },
+          });
+          planList.appendChild(item);
+        });
+      }
+
+      async function addPlan(title) {
+        const cleanTitle = title.trim();
+        if (!cleanTitle) return;
+        const { error } = await supabaseClient.from(PLANS_TABLE).insert({
+          title: cleanTitle,
+          done: false,
+        });
+        if (error) {
+          showStatus(`Error guardando plan: ${error.message}`, true);
+          return;
+        }
+        showStatus("Plan guardado.");
+      }
+
+      async function loadPlans() {
+        const { data, error } = await supabaseClient
+          .from(PLANS_TABLE)
+          .select("id, title, done, created_at")
+          .order("created_at", { ascending: false, nullsFirst: false })
+          .order("id", { ascending: false });
+        if (error) {
+          showStatus(`Error cargando planes: ${error.message}`, true);
+          return;
+        }
+        plans = (data || [])
+          .filter((plan) => plan && typeof plan.title === "string")
+          .map((plan) => ({
+            id: Number(plan.id),
+            title: plan.title.trim(),
+            done: Boolean(plan.done),
+          }))
+          .filter((plan) => plan.title.length > 0);
+        renderPlans();
+      }
+
       function renderThoughts() {
         thoughtList.innerHTML = "";
-
         thoughts.forEach((thought) => {
           const item = document.createElement("li");
           item.className = "thought-item";
-          const top = document.createElement("div");
-          top.className = "thought-item-top";
           const text = document.createElement("div");
           text.textContent = thought.text;
           const meta = document.createElement("div");
@@ -816,100 +965,131 @@
               : " - No visto"
             : "";
           meta.textContent = `#${thought.id} - ${thought.createdAt}${seenText}`;
-          top.appendChild(text);
-          item.appendChild(top);
+          item.appendChild(text);
           item.appendChild(meta);
           thoughtList.appendChild(item);
-          setupThoughtSwipe(item, thought);
+          setupSwipeActions(item, {
+            onEdit: async () => {
+              const updated = window
+                .prompt("Edita el pensamiento:", thought.text)
+                ?.trim();
+              if (!updated || updated === thought.text) return;
+              const { error } = await supabaseClient
+                .from(THOUGHTS_TABLE)
+                .update({ text: updated })
+                .eq("id", thought.id);
+              if (error) {
+                showStatus(`Error editando pensamiento: ${error.message}`, true);
+                return;
+              }
+              await loadThoughts();
+              showStatus("Pensamiento editado.");
+            },
+            onDelete: async () => {
+              const ok = window.confirm("¿Borrar este pensamiento?");
+              if (!ok) return;
+              const { error } = await supabaseClient
+                .from(THOUGHTS_TABLE)
+                .delete()
+                .eq("id", thought.id);
+              if (error) {
+                showStatus(`Error borrando pensamiento: ${error.message}`, true);
+                return;
+              }
+              await loadThoughts();
+              showStatus("Pensamiento borrado.");
+            },
+          });
         });
       }
 
-      function setupThoughtSwipe(item, thought) {
-        const SWIPE_THRESHOLD = 70;
-        let startX = 0;
-        let currentX = 0;
-        let isDragging = false;
-
-        const resetVisual = () => {
-          item.style.transform = "translateX(0)";
-          item.classList.remove("swiping-edit", "swiping-delete");
-        };
-
-        item.addEventListener(
-          "touchstart",
-          (event) => {
-            if (!event.touches || event.touches.length !== 1) return;
-            startX = event.touches[0].clientX;
-            currentX = startX;
-            isDragging = true;
-          },
-          { passive: true }
-        );
-
-        item.addEventListener(
-          "touchmove",
-          (event) => {
-            if (!isDragging || !event.touches || event.touches.length !== 1) return;
-            currentX = event.touches[0].clientX;
-            const deltaX = Math.max(-90, Math.min(90, currentX - startX));
-            item.style.transform = `translateX(${deltaX}px)`;
-            item.classList.toggle("swiping-edit", deltaX > 24);
-            item.classList.toggle("swiping-delete", deltaX < -24);
-          },
-          { passive: true }
-        );
-
-        item.addEventListener("touchend", async () => {
-          if (!isDragging) return;
-          isDragging = false;
-          const deltaX = currentX - startX;
-          resetVisual();
-          if (deltaX >= SWIPE_THRESHOLD) {
-            const updatedText = window
-              .prompt("Edita el pensamiento:", thought.text)
-              ?.trim();
-            if (!updatedText || updatedText === thought.text) return;
-            const { error } = await supabaseClient
-              .from(THOUGHTS_TABLE)
-              .update({ text: updatedText })
-              .eq("id", thought.id);
-            if (error) {
-              showStatus(`Error editando pensamiento: ${error.message}`, true);
-              return;
-            }
-            await loadThoughts();
-            showStatus("Pensamiento editado.");
-            return;
+      async function addThought(text) {
+        const cleanText = text.trim();
+        if (!cleanText) return;
+        let error = null;
+        if (thoughtsSupportsReadReceipts) {
+          const result = await supabaseClient.from(THOUGHTS_TABLE).insert({
+            text: cleanText,
+            author_id: CLIENT_ID,
+          });
+          error = result.error;
+          if (error) {
+            // Si fallan columnas/permisos de recibos de lectura, degradamos a modo básico.
+            thoughtsSupportsReadReceipts = false;
+            const fallback = await supabaseClient.from(THOUGHTS_TABLE).insert({
+              text: cleanText,
+            });
+            error = fallback.error;
           }
-          if (deltaX <= -SWIPE_THRESHOLD) {
-            const ok = window.confirm("¿Borrar este pensamiento?");
-            if (!ok) return;
-            const { error } = await supabaseClient
-              .from(THOUGHTS_TABLE)
-              .delete()
-              .eq("id", thought.id);
-            if (error) {
-              showStatus(`Error borrando pensamiento: ${error.message}`, true);
-              return;
-            }
-            await loadThoughts();
-            showStatus("Pensamiento borrado.");
-          }
-        });
-
-        item.addEventListener("touchcancel", () => {
-          isDragging = false;
-          resetVisual();
-        });
-      }
-
-      function chooseRandomMovie() {
-        if (!movies.length) {
-          randomMovieMessage.textContent = "No hay películas todavía.";
+        } else {
+          const result = await supabaseClient.from(THOUGHTS_TABLE).insert({
+            text: cleanText,
+          });
+          error = result.error;
+        }
+        if (error) {
+          showStatus(`Error guardando pensamiento: ${error.message}`, true);
           return;
         }
-        const pick = movies[Math.floor(Math.random() * movies.length)];
-        randomMovieMessage.textContent = `La película elegida es ${pick.title}!`;
+        showStatus("Pensamiento guardado.");
+      }
+
+      async function loadThoughts() {
+        const selectColumns = thoughtsSupportsReadReceipts
+          ? "id, text, created_at, author_id, seen_at, seen_by"
+          : "id, text, created_at";
+        let { data, error } = await supabaseClient
+          .from(THOUGHTS_TABLE)
+          .select(selectColumns)
+          .order("created_at", { ascending: false, nullsFirst: false })
+          .order("id", { ascending: false });
+        if (error && thoughtsSupportsReadReceipts) {
+          thoughtsSupportsReadReceipts = false;
+          const fallback = await supabaseClient
+            .from(THOUGHTS_TABLE)
+            .select("id, text, created_at")
+            .order("created_at", { ascending: false, nullsFirst: false })
+            .order("id", { ascending: false });
+          data = fallback.data;
+          error = fallback.error;
+        }
+        if (error) {
+          showStatus(`Error cargando pensamientos: ${error.message}`, true);
+          return;
+        }
+        thoughts = (data || [])
+          .filter((thought) => thought && typeof thought.text === "string")
+          .map((thought) => ({
+            id: Number(thought.id),
+            text: thought.text.trim(),
+            authorId: typeof thought.author_id === "string" ? thought.author_id : "",
+            seenAt: thought.seen_at
+              ? new Date(thought.seen_at).toLocaleString("es-ES")
+              : null,
+            seenBy: typeof thought.seen_by === "string" ? thought.seen_by : "",
+            createdAt: thought.created_at
+              ? new Date(thought.created_at).toLocaleString("es-ES")
+              : "Sin fecha",
+          }))
+          .filter((thought) => thought.text.length > 0);
+        renderThoughts();
+      }
+
+      async function markThoughtsAsSeenByOther() {
+        if (!thoughtsSupportsReadReceipts) return;
+        const { error } = await supabaseClient
+          .from(THOUGHTS_TABLE)
+          .update({
+            seen_at: new Date().toISOString(),
+            seen_by: CLIENT_ID,
+          })
+          .neq("author_id", CLIENT_ID)
+          .is("seen_at", null);
+        if (error) {
+          showStatus(`Error marcando vistos: ${error.message}`, true);
+          return;
+        }
+        // El realtime suscrito a `thoughts` recargará la lista automáticamente.
       }
 
       function moodLabelFromValue(rawValue) {
@@ -1000,116 +1180,6 @@
         }
       }
 
-      async function addThought(text) {
-        const cleanText = text.trim();
-        if (!cleanText) return;
-        let error = null;
-        if (thoughtsSupportsReadReceipts) {
-          const result = await supabaseClient.from(THOUGHTS_TABLE).insert({
-            text: cleanText,
-            author_id: CLIENT_ID,
-          });
-          error = result.error;
-          if (error) {
-            // Si fallan columnas/permisos de recibos de lectura, degradamos a modo básico.
-            thoughtsSupportsReadReceipts = false;
-            const fallback = await supabaseClient.from(THOUGHTS_TABLE).insert({
-              text: cleanText,
-            });
-            error = fallback.error;
-          }
-        } else {
-          const result = await supabaseClient.from(THOUGHTS_TABLE).insert({
-            text: cleanText,
-          });
-          error = result.error;
-        }
-        if (error) {
-          showStatus(`Error guardando pensamiento: ${error.message}`, true);
-          return;
-        }
-        showStatus("Pensamiento guardado.");
-      }
-
-      async function loadMovies() {
-        const { data, error } = await supabaseClient
-          .from(MOVIES_TABLE)
-          .select("id, title, seen, created_at")
-          .order("created_at", { ascending: false, nullsFirst: false })
-          .order("id", { ascending: false });
-        if (error) {
-          showStatus(`Error cargando películas: ${error.message}`, true);
-          return;
-        }
-        movies = (data || [])
-          .filter((movie) => movie && typeof movie.title === "string")
-          .map((movie) => ({
-            id: Number(movie.id),
-            title: movie.title.trim(),
-            seen: Boolean(movie.seen),
-          }))
-          .filter((movie) => movie.title.length > 0);
-        renderMovies();
-      }
-
-      async function loadThoughts() {
-        const selectColumns = thoughtsSupportsReadReceipts
-          ? "id, text, created_at, author_id, seen_at, seen_by"
-          : "id, text, created_at";
-        let { data, error } = await supabaseClient
-          .from(THOUGHTS_TABLE)
-          .select(selectColumns)
-          .order("created_at", { ascending: false, nullsFirst: false })
-          .order("id", { ascending: false });
-        if (error && thoughtsSupportsReadReceipts) {
-          thoughtsSupportsReadReceipts = false;
-          const fallback = await supabaseClient
-            .from(THOUGHTS_TABLE)
-            .select("id, text, created_at")
-            .order("created_at", { ascending: false, nullsFirst: false })
-            .order("id", { ascending: false });
-          data = fallback.data;
-          error = fallback.error;
-        }
-        if (error) {
-          showStatus(`Error cargando pensamientos: ${error.message}`, true);
-          return;
-        }
-        thoughts = (data || [])
-          .filter((thought) => thought && typeof thought.text === "string")
-          .map((thought) => ({
-            id: Number(thought.id),
-            text: thought.text.trim(),
-            authorId: typeof thought.author_id === "string" ? thought.author_id : "",
-            seenAt: thought.seen_at
-              ? new Date(thought.seen_at).toLocaleString("es-ES")
-              : null,
-            seenBy: typeof thought.seen_by === "string" ? thought.seen_by : "",
-            createdAt: thought.created_at
-              ? new Date(thought.created_at).toLocaleString("es-ES")
-              : "Sin fecha",
-          }))
-          .filter((thought) => thought.text.length > 0);
-        renderThoughts();
-      }
-
-      async function markThoughtsAsSeenByOther() {
-        if (!thoughtsSupportsReadReceipts) return;
-        const { error } = await supabaseClient
-          .from(THOUGHTS_TABLE)
-          .update({
-            seen_at: new Date().toISOString(),
-            seen_by: CLIENT_ID,
-          })
-          .neq("author_id", CLIENT_ID)
-          .is("seen_at", null);
-        if (error) {
-          showStatus(`Error marcando vistos: ${error.message}`, true);
-          return;
-        }
-        // El realtime suscrito a `thoughts` se encargará de recargar la lista.
-      }
-
       addMovieBtn.addEventListener("click", async () => {
         await addMovie(movieInput.value);
         movieInput.value = "";
@@ -1117,7 +1187,6 @@
         await loadMovies();
       });
       randomMovieBtn.addEventListener("click", chooseRandomMovie);
-
       movieInput.addEventListener("keydown", async (event) => {
         if (event.key === "Enter") {
           await addMovie(movieInput.value);
@@ -1126,13 +1195,28 @@
           await loadMovies();
         }
       });
+
+      addPlanBtn.addEventListener("click", async () => {
+        await addPlan(planInput.value);
+        planInput.value = "";
+        planInput.focus();
+        await loadPlans();
+      });
+      planInput.addEventListener("keydown", async (event) => {
+        if (event.key === "Enter") {
+          await addPlan(planInput.value);
+          planInput.value = "";
+          planInput.focus();
+          await loadPlans();
+        }
+      });
+
       addThoughtBtn.addEventListener("click", async () => {
         await addThought(thoughtInput.value);
         thoughtInput.value = "";
         thoughtInput.focus();
         await loadThoughts();
       });
-
       thoughtInput.addEventListener("keydown", async (event) => {
         if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
           await addThought(thoughtInput.value);
@@ -1141,6 +1225,7 @@
           await loadThoughts();
         }
       });
+
       moodSlider.addEventListener("input", async () => {
         await saveMood(moodSlider.value);
       });
@@ -1154,6 +1239,13 @@
         if (moodReasonSaveTimer) clearTimeout(moodReasonSaveTimer);
         await saveMoodReason(moodReason.value);
       });
+
+      // Botón rojo de notificación: la integración real (Web Push, FCM, etc.)
+      // se implementará más adelante. De momento sólo confirma la pulsación.
+      notifyBtn.addEventListener("click", () => {
+        showStatus("Notificación pendiente de implementar.");
+      });
+
       function subscribeRealtime() {
         supabaseClient
           .channel("movies-changes")
@@ -1173,6 +1265,17 @@
             { event: "*", schema: "public", table: THOUGHTS_TABLE },
             () => {
               loadThoughts();
+            }
+          )
+          .subscribe();
+
+        supabaseClient
+          .channel("plans-changes")
+          .on(
+            "postgres_changes",
+            { event: "*", schema: "public", table: PLANS_TABLE },
+            () => {
+              loadPlans();
             }
           )
           .subscribe();
@@ -1203,6 +1306,7 @@
         await detectReadReceiptsSupport();
         await loadMovies();
         await loadThoughts();
+        await loadPlans();
         await loadMood();
         subscribeRealtime();
         unregisterServiceWorkers();
@@ -1210,7 +1314,8 @@
       })();
 
       function formatRemaining(ms) {
-        const totalSeconds = Math.floor(ms / 1000);
+        const safeMs = Math.max(0, ms);
+        const totalSeconds = Math.floor(safeMs / 1000);
         const days = Math.floor(totalSeconds / 86400);
         const hours = Math.floor((totalSeconds % 86400) / 3600);
         const minutes = Math.floor((totalSeconds % 3600) / 60);
@@ -1221,21 +1326,17 @@
       }
 
       btn.addEventListener("click", () => {
-        msg.style.display = "block";
-        img.style.display = "block";
-        countdown.style.display = "block";
-        moodCard.style.display = "none";
         btn.style.display = "none";
+        moodCard.style.display = "none";
+        notifyBtn.style.display = "none";
+        abrasitoArea.classList.add("show");
 
-        // Fecha objetivo: hoy a las 23:45 (hora local)
-        const target = new Date();
-        target.setHours(23, 45, 0, 0);
-        const endTime = target.getTime();
-        countdownValue.textContent = formatRemaining(endTime - Date.now());
-
+        countdownValue.textContent = formatRemaining(
+          COUNTDOWN_TARGET - Date.now()
+        );
         if (countdownTimer) clearInterval(countdownTimer);
         countdownTimer = setInterval(() => {
-          const remaining = endTime - Date.now();
+          const remaining = COUNTDOWN_TARGET - Date.now();
           if (remaining <= 0) {
             countdownValue.textContent = "0d 00h 00m 00s";
             clearInterval(countdownTimer);
@@ -1244,9 +1345,10 @@
           countdownValue.textContent = formatRemaining(remaining);
         }, 1000);
 
+        markThoughtsAsSeenByOther();
+        thoughtList.scrollTop = 0;
         countdown.scrollIntoView({ behavior: "smooth", block: "center" });
       });
     </script>
   </body>
 </html>
-
