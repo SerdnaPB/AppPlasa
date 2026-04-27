@@ -15,7 +15,7 @@
     <link rel="apple-touch-icon-precomposed" href="/AppPlasa/apple-touch-icon.png" />
     <meta name="msapplication-TileColor" content="#0b1220" />
     <meta name="msapplication-TileImage" content="/AppPlasa/android-chrome-192x192.png" />
-    <meta property="og:image" content="/AppPlasa/Logo.png" />
+    <meta property="og:image" content="/AppPlasa/android-chrome-512x512.png" />
     <title>Abrasito de Andres</title>
     <style>
       :root {
@@ -436,12 +436,6 @@
         backdrop-filter: blur(10px);
         box-shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
       }
-      .hint {
-        opacity: 0.85;
-        text-align: center;
-        font-size: 14px;
-        max-width: 60ch;
-      }
     </style>
   </head>
   <body>
@@ -565,12 +559,9 @@
         SUPABASE_URL,
         SUPABASE_ANON_KEY
       );
-      const MOVIE_TABLE_CANDIDATES = ["movies", "Movies"];
-      const THOUGHT_TABLE_CANDIDATES = ["thoughts", "Thoughts"];
-      const MOOD_TABLE_CANDIDATES = ["moods", "Moods", "mood", "Mood"];
-      let MOVIES_TABLE = "movies";
-      let THOUGHTS_TABLE = "thoughts";
-      let MOODS_TABLE = "moods";
+      const MOVIES_TABLE = "movies";
+      const THOUGHTS_TABLE = "thoughts";
+      const MOODS_TABLE = "moods";
 
       let movies = [];
       let thoughts = [];
@@ -603,25 +594,7 @@
         }
       }
 
-      async function resolveTableName(candidates) {
-        for (const name of candidates) {
-          const { error } = await supabaseClient.from(name).select("id").limit(1);
-          if (!error) return name;
-          const code = error.code || "";
-          const isMissingTable = code === "PGRST205" || code === "42P01";
-          if (!isMissingTable) {
-            // Si no es error de tabla inexistente, devolvemos el nombre para
-            // que el mensaje posterior muestre el error real (RLS/columnas/etc.).
-            return name;
-          }
-        }
-        return candidates[0];
-      }
-
-      async function initSupabaseBindings() {
-        MOVIES_TABLE = await resolveTableName(MOVIE_TABLE_CANDIDATES);
-        THOUGHTS_TABLE = await resolveTableName(THOUGHT_TABLE_CANDIDATES);
-        MOODS_TABLE = await resolveTableName(MOOD_TABLE_CANDIDATES);
+      async function detectReadReceiptsSupport() {
         const { error } = await supabaseClient
           .from(THOUGHTS_TABLE)
           .select("id, author_id, seen_at, seen_by")
@@ -688,20 +661,6 @@
         closeThoughtMenu();
       });
 
-      document.addEventListener("click", (event) => {
-        const target = event.target;
-        const clickedInsideMenu = movieMenu.contains(target);
-        const clickedToggle = menuToggle.contains(target);
-        const clickedInsideThoughts = thoughtMenu.contains(target);
-        const clickedThoughtToggle = thoughtToggle.contains(target);
-        if (!clickedInsideMenu && !clickedToggle) {
-          closeMovieMenu();
-        }
-        if (!clickedInsideThoughts && !clickedThoughtToggle) {
-          closeThoughtMenu();
-        }
-      });
-
       function renderMovies() {
         movieList.innerHTML = "";
 
@@ -732,7 +691,6 @@
               checkbox.checked = !newSeen;
               item.classList.toggle("seen", !newSeen);
               showStatus(`Error actualizando película: ${error.message}`, true);
-              console.error("Error al actualizar película:", error.message);
             }
           });
           setupMovieSwipe(item, movie);
@@ -830,7 +788,6 @@
         });
         if (error) {
           showStatus(`Error guardando película: ${error.message}`, true);
-          console.error("Error al guardar película:", error.message);
           return;
         }
         showStatus("Película guardada.");
@@ -992,7 +949,6 @@
         );
         if (error) {
           showStatus(`Error guardando ánimo: ${error.message}`, true);
-          console.error("Error al guardar ánimo:", error.message);
         }
       }
 
@@ -1010,7 +966,6 @@
         );
         if (error) {
           showStatus(`Error guardando motivo: ${error.message}`, true);
-          console.error("Error al guardar motivo:", error.message);
         }
       }
 
@@ -1022,7 +977,6 @@
           .maybeSingle();
         if (error) {
           showStatus(`Error cargando ánimo: ${error.message}`, true);
-          console.error("Error al cargar ánimo:", error.message);
           const storedMood = localStorage.getItem(MOOD_STORAGE_KEY);
           applyMood(storedMood ?? "50");
           const storedMoodReason = localStorage.getItem(MOOD_REASON_STORAGE_KEY);
@@ -1072,7 +1026,6 @@
         }
         if (error) {
           showStatus(`Error guardando pensamiento: ${error.message}`, true);
-          console.error("Error al guardar pensamiento:", error.message);
           return;
         }
         showStatus("Pensamiento guardado.");
@@ -1086,7 +1039,6 @@
           .order("id", { ascending: false });
         if (error) {
           showStatus(`Error cargando películas: ${error.message}`, true);
-          console.error("Error al cargar películas:", error.message);
           return;
         }
         movies = (data || [])
@@ -1121,7 +1073,6 @@
         }
         if (error) {
           showStatus(`Error cargando pensamientos: ${error.message}`, true);
-          console.error("Error al cargar pensamientos:", error.message);
           return;
         }
         thoughts = (data || [])
@@ -1154,10 +1105,9 @@
           .is("seen_at", null);
         if (error) {
           showStatus(`Error marcando vistos: ${error.message}`, true);
-          console.error("Error al marcar vistos:", error.message);
           return;
         }
-        await loadThoughts();
+        // El realtime suscrito a `thoughts` se encargará de recargar la lista.
       }
 
       addMovieBtn.addEventListener("click", async () => {
@@ -1249,19 +1199,14 @@
           .catch(() => {});
       }
 
-      // Fuerza estado inicial consistente en primera carga.
-      closeMovieMenu();
-      closeThoughtMenu();
       (async () => {
-        await initSupabaseBindings();
+        await detectReadReceiptsSupport();
         await loadMovies();
         await loadThoughts();
         await loadMood();
         subscribeRealtime();
         unregisterServiceWorkers();
-        showStatus(
-          `Conectado a Supabase (${MOVIES_TABLE} / ${THOUGHTS_TABLE} / ${MOODS_TABLE}).`
-        );
+        showStatus("Conectado a Supabase.");
       })();
 
       function formatRemaining(ms) {
