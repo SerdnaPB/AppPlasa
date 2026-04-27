@@ -20,6 +20,7 @@
     <style>
       :root {
         color-scheme: light dark;
+        --mood-hue: 220;
       }
       body {
         margin: 0;
@@ -28,7 +29,12 @@
         place-items: center;
         font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial,
           "Apple Color Emoji", "Segoe UI Emoji";
-        background: radial-gradient(1200px 800px at 50% 25%, #1f2937, #0b1220);
+        background: radial-gradient(
+          1200px 800px at 50% 25%,
+          hsl(var(--mood-hue) 35% 18%),
+          hsl(var(--mood-hue) 50% 6%)
+        );
+        transition: background 700ms ease;
       }
       .wrap {
         width: min(720px, 92vw);
@@ -84,6 +90,29 @@
       .menu-backdrop.open {
         display: block;
       }
+      .conn-dot {
+        position: fixed;
+        top: 24px;
+        right: 138px;
+        z-index: 31;
+        width: 11px;
+        height: 11px;
+        border-radius: 50%;
+        background: #ef4444;
+        box-shadow: 0 0 0 3px rgba(2, 6, 23, 0.55);
+        transition: background 250ms ease, box-shadow 250ms ease;
+        pointer-events: none;
+      }
+      .conn-dot.online {
+        background: #22c55e;
+        box-shadow: 0 0 0 3px rgba(2, 6, 23, 0.55),
+          0 0 12px rgba(34, 197, 94, 0.7);
+      }
+      @media (max-width: 480px) {
+        .conn-dot {
+          right: 122px;
+        }
+      }
       .movie-menu,
       .plan-menu {
         position: fixed;
@@ -100,30 +129,36 @@
       .movie-menu {
         left: 0;
         border-radius: 0 16px 16px 0;
-        background-image: linear-gradient(
-            rgba(17, 24, 39, 0.45),
-            rgba(17, 24, 39, 0.45)
-          ),
-          url("./Yo.jpg");
+        background-color: rgba(17, 24, 39, 0.85);
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
         border-right: 1px solid rgba(167, 139, 250, 0.5);
         transform: translateX(-105%);
       }
+      .movie-menu.loaded {
+        background-image: linear-gradient(
+            rgba(17, 24, 39, 0.45),
+            rgba(17, 24, 39, 0.45)
+          ),
+          url("./Yo.jpg");
+      }
       .plan-menu {
         right: 0;
         border-radius: 16px 0 0 16px;
-        background-image: linear-gradient(
-            rgba(2, 6, 23, 0.5),
-            rgba(2, 6, 23, 0.5)
-          ),
-          url("./Key.jpg");
+        background-color: rgba(2, 6, 23, 0.85);
         background-size: cover;
         background-position: center 100%;
         background-repeat: no-repeat;
         border-left: 1px solid rgba(167, 139, 250, 0.5);
         transform: translateX(105%);
+      }
+      .plan-menu.loaded {
+        background-image: linear-gradient(
+            rgba(2, 6, 23, 0.5),
+            rgba(2, 6, 23, 0.5)
+          ),
+          url("./Key.jpg");
       }
       .movie-menu.open,
       .plan-menu.open {
@@ -183,14 +218,20 @@
         touch-action: pan-y;
       }
       .movie-item.swiping-edit,
-      .plan-item.swiping-edit,
-      .thought-item.swiping-edit {
+      .plan-item.swiping-edit {
         background: rgba(34, 197, 94, 0.3);
       }
       .movie-item.swiping-delete,
-      .plan-item.swiping-delete,
-      .thought-item.swiping-delete {
+      .plan-item.swiping-delete {
         background: rgba(239, 68, 68, 0.3);
+      }
+      .thought-item.swiping-edit {
+        filter: brightness(1.15) saturate(1.4)
+          drop-shadow(0 0 8px rgba(34, 197, 94, 0.6));
+      }
+      .thought-item.swiping-delete {
+        filter: brightness(0.8) saturate(0.6)
+          drop-shadow(0 0 8px rgba(239, 68, 68, 0.6));
       }
       .movie-item.seen .movie-title,
       .plan-item.done .plan-title {
@@ -441,25 +482,61 @@
       .thoughts-list {
         list-style: none;
         margin: 0;
-        padding: 0;
-        display: grid;
-        gap: 8px;
+        padding: 4px 2px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
         overflow-y: auto;
         max-height: 42vh;
       }
       .thought-item {
-        background: rgba(15, 23, 42, 0.42);
-        border-radius: 10px;
-        padding: 8px 10px;
+        position: relative;
+        max-width: 82%;
+        padding: 9px 13px;
+        border-radius: 18px;
         line-height: 1.35;
         word-break: break-word;
-        transition: transform 140ms ease, background-color 140ms ease;
+        transition: transform 140ms ease, filter 140ms ease;
         touch-action: pan-y;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.28);
+      }
+      .thought-item.mine {
+        align-self: flex-end;
+        background: linear-gradient(135deg, #4ade80, #22c55e);
+        color: #052e16;
+        border-bottom-right-radius: 6px;
+      }
+      .thought-item.other {
+        align-self: flex-start;
+        background: linear-gradient(135deg, #c4b5fd, #f9a8d4);
+        color: #2e1065;
+        border-bottom-left-radius: 6px;
+      }
+      .thought-item.mine::after,
+      .thought-item.other::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        width: 14px;
+        height: 16px;
+        background: inherit;
+      }
+      .thought-item.mine::after {
+        right: -6px;
+        clip-path: polygon(0 0, 100% 100%, 0 100%);
+      }
+      .thought-item.other::after {
+        left: -6px;
+        clip-path: polygon(100% 0, 100% 100%, 0 100%);
       }
       .thought-item-meta {
-        margin-top: 6px;
-        font-size: 12px;
-        opacity: 0.8;
+        margin-top: 5px;
+        font-size: 11px;
+        opacity: 0.75;
+        line-height: 1.2;
+      }
+      .thought-item.mine .thought-item-meta {
+        text-align: right;
       }
       .flork-img {
         width: 100%;
@@ -495,6 +572,7 @@
     </button>
     <div id="menuBackdrop" class="menu-backdrop"></div>
     <div id="planBackdrop" class="menu-backdrop"></div>
+    <div id="connDot" class="conn-dot" title="Sin conexión"></div>
     <div id="syncStatus" class="sync-status"></div>
     <aside id="movieMenu" class="movie-menu">
       <h3>Nuestros Momentos</h3>
@@ -615,7 +693,9 @@
       const notifyBtn = document.getElementById("notifyBtn");
       const abrasitoArea = document.getElementById("abrasitoArea");
       const syncStatus = document.getElementById("syncStatus");
+      const connDot = document.getElementById("connDot");
       let countdownTimer = null;
+      let chatLoaded = false;
 
       // IMPORTANTE: para frontend se usa el endpoint *.supabase.co (no el dashboard URL).
       const SUPABASE_URL = "https://vkhoxnixhqnztbbosqdk.supabase.co";
@@ -665,6 +745,23 @@
         }
       }
 
+      function setConnStatus(isOnline) {
+        connDot.classList.toggle("online", isOnline);
+        connDot.title = isOnline ? "Conectado" : "Sin conexión";
+      }
+
+      window.addEventListener("online", () => setConnStatus(true));
+      window.addEventListener("offline", () => setConnStatus(false));
+      setConnStatus(navigator.onLine);
+
+      function setMoodBackground(rawValue) {
+        const v = Math.max(0, Math.min(100, Number(rawValue)));
+        if (!Number.isFinite(v)) return;
+        // 0 (triste, frío azul ~220) → 100 (feliz, cálido naranja ~20)
+        const hue = Math.round(220 - v * 2);
+        document.documentElement.style.setProperty("--mood-hue", String(hue));
+      }
+
       async function detectReadReceiptsSupport() {
         const { error } = await supabaseClient
           .from(THOUGHTS_TABLE)
@@ -675,6 +772,7 @@
 
       function openMovieMenu() {
         closePlanMenu();
+        movieMenu.classList.add("loaded");
         movieMenu.classList.add("open");
         menuBackdrop.classList.add("open");
       }
@@ -686,6 +784,7 @@
 
       function openPlanMenu() {
         closeMovieMenu();
+        planMenu.classList.add("loaded");
         planMenu.classList.add("open");
         planBackdrop.classList.add("open");
       }
@@ -994,23 +1093,23 @@
       function renderThoughts() {
         thoughtList.innerHTML = "";
         thoughts.forEach((thought) => {
+          const isMine = thought.authorId === CLIENT_ID;
           const item = document.createElement("li");
-          item.className = "thought-item";
+          item.className = `thought-item ${isMine ? "mine" : "other"}`;
           const text = document.createElement("div");
           text.textContent = thought.text;
           const meta = document.createElement("div");
           meta.className = "thought-item-meta";
-          const isMine = thought.authorId === CLIENT_ID;
           const seenText = thoughtsSupportsReadReceipts
             ? thought.seenAt && isMine
-              ? ` - Visto (${thought.seenAt})`
+              ? " · Visto"
               : thought.seenAt
-              ? " - Visto por ti"
+              ? " · Visto por ti"
               : isMine
-              ? " - Enviado"
-              : " - No visto"
+              ? " · Enviado"
+              : " · Sin leer"
             : "";
-          meta.textContent = `#${thought.id} - ${thought.createdAt}${seenText}`;
+          meta.textContent = `${thought.createdAt}${seenText}`;
           item.appendChild(text);
           item.appendChild(meta);
           thoughtList.appendChild(item);
@@ -1087,15 +1186,15 @@
         let { data, error } = await supabaseClient
           .from(THOUGHTS_TABLE)
           .select(selectColumns)
-          .order("created_at", { ascending: false, nullsFirst: false })
-          .order("id", { ascending: false });
+          .order("created_at", { ascending: true, nullsFirst: true })
+          .order("id", { ascending: true });
         if (error && thoughtsSupportsReadReceipts) {
           thoughtsSupportsReadReceipts = false;
           const fallback = await supabaseClient
             .from(THOUGHTS_TABLE)
             .select("id, text, created_at")
-            .order("created_at", { ascending: false, nullsFirst: false })
-            .order("id", { ascending: false });
+            .order("created_at", { ascending: true, nullsFirst: true })
+            .order("id", { ascending: true });
           data = fallback.data;
           error = fallback.error;
         }
@@ -1119,6 +1218,8 @@
           }))
           .filter((thought) => thought.text.length > 0);
         renderThoughts();
+        chatLoaded = true;
+        thoughtList.scrollTop = thoughtList.scrollHeight;
       }
 
       async function markThoughtsAsSeenByOther() {
@@ -1155,6 +1256,7 @@
         moodSelected.textContent = `Ánimo actual: ${moodLabelFromValue(
           normalized
         )} (${normalized}/100)`;
+        setMoodBackground(normalized);
       }
 
       function applyMoodReason(rawReason) {
@@ -1302,7 +1404,16 @@
               loadMovies();
             }
           )
-          .subscribe();
+          .subscribe((status) => {
+            if (status === "SUBSCRIBED") setConnStatus(true);
+            else if (
+              status === "CHANNEL_ERROR" ||
+              status === "TIMED_OUT" ||
+              status === "CLOSED"
+            ) {
+              setConnStatus(false);
+            }
+          });
 
         supabaseClient
           .channel("thoughts-changes")
@@ -1310,7 +1421,7 @@
             "postgres_changes",
             { event: "*", schema: "public", table: THOUGHTS_TABLE },
             () => {
-              loadThoughts();
+              if (chatLoaded) loadThoughts();
             }
           )
           .subscribe();
@@ -1351,12 +1462,10 @@
       (async () => {
         await detectReadReceiptsSupport();
         await loadMovies();
-        await loadThoughts();
         await loadPlans();
         await loadMood();
         subscribeRealtime();
         unregisterServiceWorkers();
-        showStatus("Conectado a Supabase.");
       })();
 
       function formatRemaining(ms) {
@@ -1371,7 +1480,7 @@
         ).padStart(2, "0")}m ${String(seconds).padStart(2, "0")}s`;
       }
 
-      btn.addEventListener("click", () => {
+      btn.addEventListener("click", async () => {
         btn.style.display = "none";
         moodCard.style.display = "none";
         notifyBtn.style.display = "none";
@@ -1395,9 +1504,10 @@
           countdownValue.textContent = formatRemaining(remaining);
         }, 1000);
 
-        markThoughtsAsSeenByOther();
-        thoughtList.scrollTop = 0;
         countdown.scrollIntoView({ behavior: "smooth", block: "center" });
+        // Lazy load: el chat sólo se carga cuando se entra al modo Abrasito.
+        await loadThoughts();
+        markThoughtsAsSeenByOther();
       });
     </script>
   </body>
