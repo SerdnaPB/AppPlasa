@@ -964,6 +964,28 @@
         }
       }
 
+      function friendlyBombonesError(raw) {
+        const msg = String(raw?.message || raw || "");
+        if (!msg) return "Error desconocido.";
+        const lower = msg.toLowerCase();
+        if (lower.includes("bucket") && lower.includes("not found")) {
+          return `No existe el bucket "${BOMBONES_BUCKET}" en Storage. Créalo y prueba otra vez.`;
+        }
+        if (lower.includes("row-level security") || lower.includes("rls")) {
+          return "Supabase está bloqueando la operación por permisos (RLS). Hay que crear policies para Storage y para la tabla.";
+        }
+        if (lower.includes("permission denied") || lower.includes("not allowed")) {
+          return "Permiso denegado. Revisa policies de Storage/tabla para el rol anon.";
+        }
+        if (lower.includes("relation") && lower.includes("does not exist")) {
+          return `No existe la tabla "${BOMBONES_TABLE}". Créala en el SQL Editor.`;
+        }
+        if (lower.includes("crypto.randomuuid")) {
+          return "Este navegador no soporta randomUUID; actualiza el navegador o te lo adapto con un fallback.";
+        }
+        return msg;
+      }
+
       function setConnStatus(isOnline) {
         if (!connBadge) return;
         connBadge.classList.toggle("online", isOnline);
@@ -1765,7 +1787,11 @@
       async function uploadBombonesFileToStorage(file) {
         const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
         const safeExt = /^[a-z0-9]{1,8}$/.test(ext) ? ext : "jpg";
-        const path = `stickers/${crypto.randomUUID()}.${safeExt}`;
+        const uuid =
+          typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+            ? crypto.randomUUID()
+            : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+        const path = `stickers/${uuid}.${safeExt}`;
         const { error: upErr } = await supabaseClient.storage
           .from(BOMBONES_BUCKET)
           .upload(path, file, {
@@ -1817,7 +1843,7 @@
           .order("created_at", { ascending: true, nullsFirst: true })
           .order("id", { ascending: true });
         if (error) {
-          showStatus(`Error cargando bombones: ${error.message}`, true);
+          showStatus(`Error cargando bombones: ${friendlyBombonesError(error)}`, true);
           return;
         }
         bombonesStickers.innerHTML = "";
@@ -1910,7 +1936,7 @@
             makeStickerDraggable(tmp);
             showStatus("Imagen guardada.");
           } catch (e) {
-            showStatus(`Error subiendo imagen: ${e?.message || e}`, true);
+            showStatus(`Error subiendo imagen: ${friendlyBombonesError(e)}`, true);
           } finally {
             bombonesFile.value = "";
           }
