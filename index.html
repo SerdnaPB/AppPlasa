@@ -475,20 +475,87 @@
         inset: 0;
         pointer-events: none;
       }
-      .bombones-sticker {
+      .bombones-sticker-wrap {
         position: absolute;
         width: 160px;
         max-width: 42vw;
-        height: auto;
-        border-radius: 10px;
+        border-radius: 12px;
         box-shadow: 0 10px 26px rgba(2, 6, 23, 0.22);
         pointer-events: auto;
         touch-action: none;
         user-select: none;
         cursor: grab;
       }
-      .bombones-sticker:active {
+      .bombones-sticker-wrap:active {
         cursor: grabbing;
+      }
+      .bombones-sticker-wrap.selected {
+        box-shadow: 0 12px 34px rgba(2, 6, 23, 0.28), 0 0 0 3px rgba(45, 212, 191, 0.55);
+      }
+      .bombones-sticker-img {
+        display: block;
+        width: 100%;
+        height: auto;
+        border-radius: 12px;
+      }
+      .bombones-pin {
+        position: absolute;
+        top: -10px;
+        left: 14px;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        box-shadow: 0 8px 18px rgba(2, 6, 23, 0.28);
+        border: 2px solid rgba(255, 255, 255, 0.7);
+      }
+      .bombones-pin::after {
+        content: "";
+        position: absolute;
+        left: 50%;
+        top: 14px;
+        transform: translateX(-50%);
+        width: 2px;
+        height: 14px;
+        background: rgba(2, 6, 23, 0.45);
+        border-radius: 2px;
+      }
+      .bombones-pin.c1 { background: #fb7185; } /* rosa */
+      .bombones-pin.c2 { background: #60a5fa; } /* azul */
+      .bombones-pin.c3 { background: #34d399; } /* verde */
+      .bombones-pin.c4 { background: #fbbf24; } /* amarillo */
+      .bombones-pin.c5 { background: #a78bfa; } /* morado */
+
+      .bombones-controls {
+        position: fixed;
+        left: 50%;
+        bottom: 16px;
+        transform: translateX(-50%);
+        z-index: 61;
+        display: none;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 12px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid rgba(15, 23, 42, 0.14);
+        box-shadow: 0 14px 34px rgba(2, 6, 23, 0.18);
+        backdrop-filter: blur(6px);
+      }
+      .bombones-controls.show {
+        display: inline-flex;
+      }
+      .bombones-controls button {
+        border: 0;
+        border-radius: 999px;
+        padding: 8px 10px;
+        font-weight: 900;
+        cursor: pointer;
+        background: rgba(20, 184, 166, 0.15);
+        color: #042f2e;
+      }
+      .bombones-controls input[type="range"] {
+        width: min(220px, 46vw);
+        accent-color: #14b8a6;
       }
       .bombones-upload {
         position: fixed;
@@ -780,6 +847,11 @@
       <button id="bombonesUpload" class="bombones-upload" type="button">
         Subir imagen
       </button>
+      <div id="bombonesControls" class="bombones-controls" aria-label="Controles de imagen">
+        <button id="bombonesSmaller" type="button">−</button>
+        <input id="bombonesSize" type="range" min="60" max="340" step="2" value="160" />
+        <button id="bombonesBigger" type="button">+</button>
+      </div>
     </section>
     <aside id="movieMenu" class="movie-menu">
       <h3>Nuestros Momentos</h3>
@@ -908,6 +980,10 @@
       const bombonesFile = document.getElementById("bombonesFile");
       const bombonesStage = document.getElementById("bombonesStage");
       const bombonesStickers = document.getElementById("bombonesStickers");
+      const bombonesControls = document.getElementById("bombonesControls");
+      const bombonesSmaller = document.getElementById("bombonesSmaller");
+      const bombonesBigger = document.getElementById("bombonesBigger");
+      const bombonesSize = document.getElementById("bombonesSize");
       const abrasitoArea = document.getElementById("abrasitoArea");
       const syncStatus = document.getElementById("syncStatus");
       const connBadge = document.getElementById("connStatusBadge");
@@ -1676,6 +1752,69 @@
         };
       }
 
+      let selectedSticker = null;
+
+      function clearSelectedSticker() {
+        if (selectedSticker) selectedSticker.classList.remove("selected");
+        selectedSticker = null;
+        bombonesControls?.classList.remove("show");
+      }
+
+      function selectSticker(stickerWrap) {
+        if (!stickerWrap) return;
+        if (selectedSticker && selectedSticker !== stickerWrap) {
+          selectedSticker.classList.remove("selected");
+        }
+        selectedSticker = stickerWrap;
+        selectedSticker.classList.add("selected");
+        const rect = getStickerRectWithinStage(selectedSticker);
+        if (bombonesSize && rect) bombonesSize.value = String(Math.round(rect.width));
+        bombonesControls?.classList.add("show");
+      }
+
+      function createStickerElement({
+        id = null,
+        imageUrl,
+        left = 0,
+        top = 0,
+        width = 160,
+        rotation = 0,
+        pinColor = null,
+      }) {
+        const wrap = document.createElement("div");
+        wrap.className = "bombones-sticker-wrap";
+        if (id != null) wrap.dataset.stickerId = String(id);
+        if (pinColor) wrap.dataset.pinColor = String(pinColor);
+        wrap.style.left = `${Math.max(0, normalizeNumber(left, 0))}px`;
+        wrap.style.top = `${Math.max(0, normalizeNumber(top, 0))}px`;
+        wrap.style.width = `${Math.max(60, normalizeNumber(width, 160))}px`;
+        wrap.style.transform = `rotate(${normalizeNumber(rotation, 0)}deg)`;
+
+        const pin = document.createElement("span");
+        const color =
+          pinColor ||
+          ["c1", "c2", "c3", "c4", "c5"][Math.floor(Math.random() * 5)];
+        pin.className = `bombones-pin ${color}`;
+
+        const img = document.createElement("img");
+        img.className = "bombones-sticker-img";
+        img.src = imageUrl;
+        img.alt = "Imagen subida";
+        img.decoding = "async";
+        img.draggable = false;
+
+        wrap.appendChild(pin);
+        wrap.appendChild(img);
+
+        wrap.addEventListener("pointerup", (e) => {
+          // evita selección al terminar un drag fuerte
+          if (Math.abs((e.clientX || 0) - (wrap._downX || 0)) > 6) return;
+          selectSticker(wrap);
+        });
+
+        return wrap;
+      }
+
       function makeStickerDraggable(sticker) {
         let startX = 0;
         let startY = 0;
@@ -1690,6 +1829,7 @@
 
         sticker.addEventListener("pointerdown", (event) => {
           if (!bombonesStage) return;
+          sticker._downX = event.clientX;
           dragging = true;
           bringToFront();
           sticker.setPointerCapture(event.pointerId);
@@ -1732,6 +1872,7 @@
           const id = sticker.dataset.stickerId;
           sticker.remove();
           if (id) deleteBombonesStickerRecord(id);
+          if (selectedSticker === sticker) clearSelectedSticker();
         });
       }
 
@@ -1839,7 +1980,7 @@
         if (!bombonesStickers) return;
         const { data, error } = await supabaseClient
           .from(BOMBONES_TABLE)
-          .select("id, image_url, left, top, width, rotation, created_at")
+          .select("id, image_url, left, top, width, rotation, pin_color, created_at")
           .order("created_at", { ascending: true, nullsFirst: true })
           .order("id", { ascending: true });
         if (error) {
@@ -1847,26 +1988,20 @@
           return;
         }
         bombonesStickers.innerHTML = "";
+        clearSelectedSticker();
         (data || []).forEach((row) => {
           if (!row?.image_url) return;
-          const img = document.createElement("img");
-          img.className = "bombones-sticker";
-          img.src = row.image_url;
-          img.alt = "Imagen subida";
-          img.decoding = "async";
-          img.draggable = false;
-          img.dataset.stickerId = String(row.id);
-          const left = normalizeNumber(row.left, 0);
-          const top = normalizeNumber(row.top, 0);
-          const width = normalizeNumber(row.width, 160);
-          const rotation = normalizeNumber(row.rotation, 0);
-          img.style.left = `${Math.max(0, left)}px`;
-          img.style.top = `${Math.max(0, top)}px`;
-          img.style.width = `${Math.max(60, width)}px`;
-          img.style.height = "auto";
-          img.style.transform = `rotate(${rotation}deg)`;
-          bombonesStickers.appendChild(img);
-          makeStickerDraggable(img);
+          const wrap = createStickerElement({
+            id: row.id,
+            imageUrl: row.image_url,
+            left: row.left,
+            top: row.top,
+            width: row.width,
+            rotation: row.rotation,
+            pinColor: row.pin_color || null,
+          });
+          bombonesStickers.appendChild(wrap);
+          makeStickerDraggable(wrap);
         });
       }
 
@@ -1881,28 +2016,33 @@
             showStatus("Subiendo imagen...");
             const { publicUrl } = await uploadBombonesFileToStorage(file);
 
-            const tmp = document.createElement("img");
-            tmp.className = "bombones-sticker";
-            tmp.src = publicUrl;
-            tmp.alt = "Imagen subida";
-            tmp.decoding = "async";
-            tmp.draggable = false;
-            tmp.style.left = "0px";
-            tmp.style.top = "0px";
-            tmp.style.transform = `rotate(${(Math.random() * 10 - 5).toFixed(2)}deg)`;
+            const rotation = Number((Math.random() * 10 - 5).toFixed(2));
+            const pinColor = ["c1", "c2", "c3", "c4", "c5"][
+              Math.floor(Math.random() * 5)
+            ];
+            const tmp = createStickerElement({
+              imageUrl: publicUrl,
+              left: 0,
+              top: 0,
+              width: 160,
+              rotation,
+              pinColor,
+            });
             bombonesStickers?.appendChild(tmp);
 
+            const tmpImg = tmp.querySelector(".bombones-sticker-img");
             await new Promise((resolve, reject) => {
-              tmp.addEventListener("load", resolve, { once: true });
-              tmp.addEventListener("error", reject, { once: true });
+              tmpImg?.addEventListener("load", resolve, { once: true });
+              tmpImg?.addEventListener("error", reject, { once: true });
             });
 
             const stageRect = bombonesStage?.getBoundingClientRect();
             const maxW = stageRect ? Math.min(180, stageRect.width * 0.45) : 160;
-            const ratio = tmp.naturalWidth ? tmp.naturalHeight / tmp.naturalWidth : 1;
+            const ratio = tmpImg?.naturalWidth
+              ? tmpImg.naturalHeight / tmpImg.naturalWidth
+              : 1;
             const finalW = clamp(maxW, 90, 220);
             tmp.style.width = `${finalW}px`;
-            tmp.style.height = `${Math.round(finalW * ratio)}px`;
 
             const pad = 10;
             const w = finalW;
@@ -1919,21 +2059,18 @@
               top: 0,
               width: finalW,
             };
-            const rotationMatch = /rotate\(([-0-9.]+)deg\)/.exec(
-              tmp.style.transform || ""
-            );
-            const rotation = rotationMatch ? Number(rotationMatch[1]) : 0;
-
             const id = await createBombonesStickerRecord({
               image_url: publicUrl,
               left: Math.round(rect.left),
               top: Math.round(rect.top),
               width: Math.round(rect.width),
               rotation,
+              pin_color: pinColor,
             });
             if (!id) throw new Error("No se pudo guardar el registro.");
             tmp.dataset.stickerId = String(id);
             makeStickerDraggable(tmp);
+            selectSticker(tmp);
             showStatus("Imagen guardada.");
           } catch (e) {
             showStatus(`Error subiendo imagen: ${friendlyBombonesError(e)}`, true);
@@ -1941,6 +2078,42 @@
             bombonesFile.value = "";
           }
         })();
+      });
+
+      function applySelectedStickerSize(newWidth) {
+        if (!selectedSticker) return;
+        const w = clamp(Number(newWidth), 60, 340);
+        selectedSticker.style.width = `${w}px`;
+        const id = selectedSticker.dataset.stickerId;
+        const rect = getStickerRectWithinStage(selectedSticker);
+        if (id && rect) {
+          updateBombonesSticker(id, {
+            left: Math.round(rect.left),
+            top: Math.round(rect.top),
+            width: Math.round(rect.width),
+          });
+        }
+      }
+
+      bombonesSize?.addEventListener("input", () => {
+        applySelectedStickerSize(bombonesSize.value);
+      });
+      bombonesBigger?.addEventListener("click", () => {
+        if (!bombonesSize) return;
+        bombonesSize.value = String(clamp(Number(bombonesSize.value) + 12, 60, 340));
+        applySelectedStickerSize(bombonesSize.value);
+      });
+      bombonesSmaller?.addEventListener("click", () => {
+        if (!bombonesSize) return;
+        bombonesSize.value = String(clamp(Number(bombonesSize.value) - 12, 60, 340));
+        applySelectedStickerSize(bombonesSize.value);
+      });
+
+      // Clic en el fondo para deseleccionar
+      bombonesStage?.addEventListener("pointerup", (event) => {
+        if (event.target === bombonesStage || event.target === bombonesBoard) {
+          clearSelectedSticker();
+        }
       });
 
       function subscribeRealtime() {
