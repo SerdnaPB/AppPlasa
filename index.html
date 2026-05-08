@@ -434,7 +434,7 @@
         z-index: 60;
         display: none;
         background: #ffffff;
-        padding: 18px 16px 70px;
+        padding: 0;
         box-sizing: border-box;
       }
       .bombones-view.open {
@@ -457,19 +457,18 @@
         box-shadow: 0 10px 28px rgba(2, 6, 23, 0.12);
       }
       .bombones-stage {
-        width: min(980px, 94vw);
-        max-height: 82vh;
+        width: 100vw;
+        height: 100vh;
         position: relative;
         display: grid;
         place-items: center;
       }
       .bombones-board {
         width: 100%;
-        height: auto;
-        max-height: 82vh;
-        object-fit: contain;
-        border-radius: 12px;
-        box-shadow: 0 20px 60px rgba(2, 6, 23, 0.18);
+        height: 100%;
+        object-fit: cover;
+        border-radius: 0;
+        box-shadow: none;
       }
       .bombones-stickers {
         position: absolute;
@@ -765,7 +764,7 @@
         <img
           id="bombonesBoard"
           class="bombones-board"
-          src="./tabla-corcho.jpg"
+          src="./tabboard-corcho.avif"
           alt="Tabla de corcho"
           loading="eager"
           decoding="async"
