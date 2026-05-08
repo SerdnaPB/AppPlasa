@@ -831,7 +831,7 @@
         <img
           id="bombonesBoard"
           class="bombones-board"
-          src="./tabboard-corcho.avif"
+          src="./tabboard-corcho.jpg"
           alt="Tabla de corcho"
           loading="eager"
           decoding="async"
@@ -980,6 +980,7 @@
       const bombonesFile = document.getElementById("bombonesFile");
       const bombonesStage = document.getElementById("bombonesStage");
       const bombonesStickers = document.getElementById("bombonesStickers");
+      const bombonesBoard = document.getElementById("bombonesBoard");
       const bombonesControls = document.getElementById("bombonesControls");
       const bombonesSmaller = document.getElementById("bombonesSmaller");
       const bombonesBigger = document.getElementById("bombonesBigger");
@@ -1821,6 +1822,10 @@
         let originLeft = 0;
         let originTop = 0;
         let dragging = false;
+        const pointers = new Map();
+        let pinching = false;
+        let pinchStartDist = 0;
+        let pinchStartWidth = 0;
 
         const bringToFront = () => {
           const now = Date.now();
@@ -1830,9 +1835,24 @@
         sticker.addEventListener("pointerdown", (event) => {
           if (!bombonesStage) return;
           sticker._downX = event.clientX;
-          dragging = true;
           bringToFront();
           sticker.setPointerCapture(event.pointerId);
+          pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+
+          if (pointers.size === 2) {
+            // Inicia pellizco (pinch-to-zoom)
+            pinching = true;
+            dragging = false;
+            const pts = Array.from(pointers.values());
+            pinchStartDist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+            pinchStartWidth = sticker.getBoundingClientRect().width;
+            selectSticker(sticker);
+            return;
+          }
+
+          // Drag normal (1 dedo)
+          pinching = false;
+          dragging = true;
           startX = event.clientX;
           startY = event.clientY;
           originLeft = Number.parseFloat(sticker.style.left || "0");
@@ -1840,7 +1860,26 @@
         });
 
         sticker.addEventListener("pointermove", (event) => {
-          if (!dragging || !bombonesStage) return;
+          if (!bombonesStage) return;
+          if (pointers.has(event.pointerId)) {
+            pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+          }
+
+          // Pinch
+          if (pinching && pointers.size === 2) {
+            const pts = Array.from(pointers.values());
+            const dist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+            if (pinchStartDist > 0) {
+              const ratio = dist / pinchStartDist;
+              const nextW = clamp(pinchStartWidth * ratio, 60, 340);
+              sticker.style.width = `${nextW}px`;
+              if (bombonesSize) bombonesSize.value = String(Math.round(nextW));
+            }
+            return;
+          }
+
+          // Drag
+          if (!dragging) return;
           const rect = bombonesStage.getBoundingClientRect();
           const dx = event.clientX - startX;
           const dy = event.clientY - startY;
@@ -1853,7 +1892,10 @@
         });
 
         sticker.addEventListener("pointerup", () => {
+          pointers.clear();
+          const wasPinching = pinching;
           dragging = false;
+          pinching = false;
           const id = sticker.dataset.stickerId;
           const rect = getStickerRectWithinStage(sticker);
           if (id && rect) {
@@ -1863,9 +1905,12 @@
               width: Math.round(rect.width),
             });
           }
+          if (wasPinching) selectSticker(sticker);
         });
         sticker.addEventListener("pointercancel", () => {
+          pointers.clear();
           dragging = false;
+          pinching = false;
         });
 
         sticker.addEventListener("dblclick", () => {
