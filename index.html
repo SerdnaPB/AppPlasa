@@ -872,6 +872,122 @@
       .sync-status.show {
         display: block;
       }
+      .need-alert {
+        position: fixed;
+        inset: 0;
+        z-index: 80;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        background: rgba(2, 6, 23, 0.78);
+        -webkit-backdrop-filter: blur(4px);
+        backdrop-filter: blur(4px);
+      }
+      .need-alert.show {
+        display: flex;
+        animation: needAlertFade 220ms ease-out;
+      }
+      @keyframes needAlertFade {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+      .need-alert-card {
+        width: min(440px, 90vw);
+        background: linear-gradient(
+          135deg,
+          #fda4af 0%,
+          #fb7185 55%,
+          #be185d 100%
+        );
+        color: #fff5f5;
+        border-radius: 26px;
+        padding: 30px 22px 22px;
+        text-align: center;
+        box-shadow: 0 22px 60px rgba(190, 24, 93, 0.5),
+          inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.22);
+      }
+      .need-alert-heart {
+        font-size: clamp(68px, 16vw, 120px);
+        line-height: 1;
+        animation: needHeartBeat 900ms ease-in-out infinite;
+        text-shadow: 0 6px 22px rgba(190, 24, 93, 0.55);
+      }
+      @keyframes needHeartBeat {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        20% {
+          transform: scale(1.18);
+        }
+        40% {
+          transform: scale(0.92);
+        }
+        60% {
+          transform: scale(1.1);
+        }
+      }
+      .need-alert-title {
+        margin: 10px 0 4px;
+        font-size: clamp(22px, 5vw, 32px);
+        font-weight: 900;
+        letter-spacing: 0.4px;
+      }
+      .need-alert-sub {
+        margin: 0 0 18px;
+        font-size: 15px;
+        opacity: 0.94;
+        line-height: 1.35;
+      }
+      .need-alert-time {
+        display: inline-block;
+        margin: 0 0 16px;
+        padding: 4px 10px;
+        font-size: 12px;
+        font-weight: 700;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.18);
+      }
+      .need-alert-btn {
+        border: 0;
+        border-radius: 999px;
+        padding: 13px 28px;
+        font-size: 17px;
+        font-weight: 900;
+        cursor: pointer;
+        background: rgba(255, 255, 255, 0.96);
+        color: #831843;
+        box-shadow: 0 12px 28px rgba(190, 24, 93, 0.45);
+        transition: transform 120ms ease, filter 120ms ease;
+      }
+      .need-alert-btn:active {
+        transform: scale(0.96);
+        filter: brightness(0.97);
+      }
+      .notify-btn.sent {
+        animation: notifySent 600ms ease-out;
+      }
+      @keyframes notifySent {
+        0% {
+          transform: scale(1);
+        }
+        40% {
+          transform: scale(1.05);
+          filter: brightness(1.1);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+      .notify-btn:disabled {
+        opacity: 0.7;
+        cursor: progress;
+      }
       @media (max-width: 860px) {
         .movie-menu,
         .plan-menu {
@@ -1092,6 +1208,25 @@
     <div id="planBackdrop" class="menu-backdrop"></div>
     <div id="connStatusBadge" class="conn-pill" aria-live="polite">Desconectado</div>
     <div id="syncStatus" class="sync-status"></div>
+    <div
+      id="needAlert"
+      class="need-alert"
+      role="alertdialog"
+      aria-live="assertive"
+      aria-hidden="true"
+    >
+      <div class="need-alert-card">
+        <div class="need-alert-heart" aria-hidden="true">❤️</div>
+        <h2 class="need-alert-title">Te necesita</h2>
+        <p class="need-alert-sub">¡Le hace falta un abracito! 🫂</p>
+        <div id="needAlertTime" class="need-alert-time">Justo ahora</div>
+        <div>
+          <button id="needAlertDismiss" class="need-alert-btn" type="button">
+            Voy 💗
+          </button>
+        </div>
+      </div>
+    </div>
     <section
       id="bombonesView"
       class="bombones-view"
@@ -1282,6 +1417,9 @@
       const moodReason = document.getElementById("moodReason");
       const moodCard = document.getElementById("moodCard");
       const notifyBtn = document.getElementById("notifyBtn");
+      const needAlert = document.getElementById("needAlert");
+      const needAlertTime = document.getElementById("needAlertTime");
+      const needAlertDismiss = document.getElementById("needAlertDismiss");
       const bombonesBtn = document.getElementById("bombonesBtn");
       const bombonesView = document.getElementById("bombonesView");
       const bombonesClose = document.getElementById("bombonesClose");
@@ -1322,6 +1460,8 @@
       const PLANS_TABLE = "plans";
       const BOMBONES_TABLE = "bombones_stickers";
       const BOMBONES_BUCKET = "bombones";
+      const NOTIFICATIONS_TABLE = "notifications";
+      const NOTIFY_COOLDOWN_MS = 5000;
 
       // Fecha objetivo del countdown: 21 de mayo de 2026 a las 22:00 (hora local).
       const COUNTDOWN_TARGET = new Date(2026, 4, 21, 22, 0, 0, 0).getTime();
@@ -2104,10 +2244,134 @@
         await saveMoodReason(moodReason.value);
       });
 
-      // Botón rojo de notificación: la integración real (Web Push, FCM, etc.)
-      // se implementará más adelante. De momento sólo confirma la pulsación.
-      notifyBtn.addEventListener("click", () => {
-        showStatus("Notificación pendiente de implementar.");
+      let lastNotifySend = 0;
+
+      async function ensureNotificationPermission() {
+        if (!("Notification" in window)) return "unsupported";
+        if (Notification.permission !== "default") {
+          return Notification.permission;
+        }
+        try {
+          return await Notification.requestPermission();
+        } catch (_) {
+          return Notification.permission;
+        }
+      }
+
+      function vibrateIfPossible() {
+        try {
+          if (typeof navigator.vibrate === "function") {
+            navigator.vibrate([180, 90, 180, 90, 220]);
+          }
+        } catch (_) {}
+      }
+
+      function formatRelativeFromNow(isoOrDate) {
+        const date = isoOrDate instanceof Date ? isoOrDate : new Date(isoOrDate);
+        if (Number.isNaN(date.getTime())) return "Justo ahora";
+        const diffSec = Math.max(0, Math.round((Date.now() - date.getTime()) / 1000));
+        if (diffSec < 10) return "Justo ahora";
+        if (diffSec < 60) return `Hace ${diffSec}s`;
+        const diffMin = Math.round(diffSec / 60);
+        if (diffMin < 60) return `Hace ${diffMin} min`;
+        return date.toLocaleString("es-ES");
+      }
+
+      function fireSystemNotification(createdAt) {
+        if (!("Notification" in window)) return;
+        if (Notification.permission !== "granted") return;
+        try {
+          const n = new Notification("❤️ Te necesita", {
+            body: "Pulsa para abrir nuestro pequeño rinconcito 💗",
+            tag: "te-necesito",
+            renotify: true,
+            silent: true,
+            icon: "/AppPlasa/android-chrome-192x192.png",
+            badge: "/AppPlasa/android-chrome-192x192.png",
+            timestamp: new Date(createdAt || Date.now()).getTime(),
+          });
+          n.onclick = () => {
+            try {
+              window.focus();
+            } catch (_) {}
+            n.close();
+          };
+        } catch (_) {}
+      }
+
+      function showNeedAlertFromRow(row) {
+        if (!row || !needAlert) return;
+        const fromSelf = row.author_id === CLIENT_ID;
+        if (fromSelf) return; // Al emisor sólo le mostramos el toast de "enviado".
+        if (needAlertTime) {
+          needAlertTime.textContent = formatRelativeFromNow(
+            row.created_at || new Date()
+          );
+        }
+        // Si ya estaba visible, reiniciamos la animación del corazón.
+        needAlert.classList.remove("show");
+        // Forzar reflow para reiniciar la animación CSS.
+        void needAlert.offsetWidth;
+        needAlert.classList.add("show");
+        needAlert.setAttribute("aria-hidden", "false");
+        vibrateIfPossible();
+        if (document.hidden) {
+          fireSystemNotification(row.created_at);
+        }
+      }
+
+      function hideNeedAlert() {
+        if (!needAlert) return;
+        needAlert.classList.remove("show");
+        needAlert.setAttribute("aria-hidden", "true");
+      }
+
+      needAlertDismiss?.addEventListener("click", hideNeedAlert);
+      needAlert?.addEventListener("click", (event) => {
+        if (event.target === needAlert) hideNeedAlert();
+      });
+
+      notifyBtn.addEventListener("click", async () => {
+        const now = Date.now();
+        const sinceLast = now - lastNotifySend;
+        if (sinceLast < NOTIFY_COOLDOWN_MS) {
+          const remaining = Math.ceil(
+            (NOTIFY_COOLDOWN_MS - sinceLast) / 1000
+          );
+          showStatus(`Espera ${remaining}s antes de volver a avisar.`);
+          return;
+        }
+        // Aprovechamos el gesto del usuario para pedir permiso de notificación
+        // del sistema (servirá cuando él o ella reciban un aviso).
+        await ensureNotificationPermission();
+        notifyBtn.disabled = true;
+        notifyBtn.classList.remove("sent");
+        const { error } = await supabaseClient
+          .from(NOTIFICATIONS_TABLE)
+          .insert({
+            author_id: CLIENT_ID,
+          });
+        notifyBtn.disabled = false;
+        if (error) {
+          const msg = error.message || "Error desconocido";
+          const lower = msg.toLowerCase();
+          if (
+            lower.includes("relation") &&
+            lower.includes("does not exist")
+          ) {
+            showStatus(
+              `Crea la tabla "${NOTIFICATIONS_TABLE}" en Supabase (mira el script SQL).`,
+              true
+            );
+          } else {
+            showStatus(`Error enviando aviso: ${msg}`, true);
+          }
+          return;
+        }
+        lastNotifySend = now;
+        notifyBtn.classList.add("sent");
+        setTimeout(() => notifyBtn.classList.remove("sent"), 700);
+        showStatus("Aviso enviado 💗");
       });
 
       function openBombones() {
@@ -2817,6 +3081,21 @@
             { event: "*", schema: "public", table: MOODS_TABLE },
             () => {
               loadMood();
+            }
+          )
+          .subscribe();
+
+        supabaseClient
+          .channel("notifications-changes")
+          .on(
+            "postgres_changes",
+            {
+              event: "INSERT",
+              schema: "public",
+              table: NOTIFICATIONS_TABLE,
+            },
+            (payload) => {
+              showNeedAlertFromRow(payload?.new);
             }
           )
           .subscribe();
