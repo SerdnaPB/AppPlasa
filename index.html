@@ -485,6 +485,92 @@
         touch-action: none;
         user-select: none;
         cursor: grab;
+        perspective: 900px;
+      }
+      .bombones-sticker-inner {
+        position: relative;
+        width: 100%;
+        transform-style: preserve-3d;
+        transition: transform 500ms ease;
+      }
+      .bombones-sticker-wrap.flipped .bombones-sticker-inner {
+        transform: rotateY(180deg);
+      }
+      .bombones-sticker-img,
+      .bombones-sticker-back {
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+      }
+      .bombones-sticker-back {
+        position: absolute;
+        inset: 0;
+        transform: rotateY(180deg);
+        border-radius: 12px;
+        background: linear-gradient(135deg, #fef9c3, #fde68a);
+        color: #422006;
+        padding: 10px 10px 8px;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        box-shadow: inset 0 0 0 1px rgba(180, 83, 9, 0.4);
+      }
+      .bombones-sticker-wrap:not(.flipped) .bombones-sticker-back {
+        pointer-events: none;
+      }
+      .bombones-sticker-wrap.flipped .bombones-sticker-img {
+        pointer-events: none;
+      }
+      .bombones-sticker-back-title {
+        font-size: 11px;
+        font-weight: 900;
+        letter-spacing: 0.4px;
+        text-transform: uppercase;
+        opacity: 0.75;
+        margin: 0;
+      }
+      .bombones-sticker-note {
+        flex: 1;
+        min-height: 50px;
+        width: 100%;
+        border: 0;
+        border-radius: 8px;
+        resize: none;
+        background: rgba(255, 255, 255, 0.78);
+        padding: 6px 8px;
+        font-size: 13px;
+        color: #422006;
+        box-sizing: border-box;
+        font-family: inherit;
+        line-height: 1.3;
+      }
+      .bombones-sticker-note:focus {
+        outline: 2px solid rgba(180, 83, 9, 0.45);
+        outline-offset: 0;
+      }
+      .bombones-sticker-flip {
+        position: absolute;
+        top: -12px;
+        right: 8px;
+        z-index: 3;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        border: 0;
+        background: rgba(255, 255, 255, 0.96);
+        color: #422006;
+        font-size: 15px;
+        font-weight: 900;
+        cursor: pointer;
+        box-shadow: 0 6px 16px rgba(2, 6, 23, 0.28);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        line-height: 1;
+      }
+      .bombones-sticker-flip:active {
+        transform: scale(0.94);
       }
       .bombones-sticker-wrap:active {
         cursor: grabbing;
@@ -580,6 +666,157 @@
         height: 1px;
         opacity: 0;
         pointer-events: none;
+      }
+      .bombones-folders-toggle {
+        position: fixed;
+        top: 14px;
+        right: 14px;
+        z-index: 62;
+        border: 0;
+        border-radius: 12px;
+        padding: 10px 14px;
+        font-size: 14px;
+        font-weight: 900;
+        cursor: pointer;
+        background: rgba(217, 119, 6, 0.95);
+        color: #fff7ed;
+        box-shadow: 0 10px 28px rgba(2, 6, 23, 0.18);
+        display: none;
+        align-items: center;
+        gap: 6px;
+      }
+      .bombones-view.open .bombones-folders-toggle {
+        display: inline-flex;
+      }
+      .bombones-view.no-folders .bombones-folders-toggle,
+      .bombones-view.no-folders .bombones-current-folder,
+      .bombones-view.no-folders .bombones-folders {
+        display: none !important;
+      }
+      .bombones-current-folder {
+        position: fixed;
+        top: 18px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 61;
+        display: none;
+        pointer-events: none;
+        background: rgba(255, 251, 235, 0.95);
+        color: #422006;
+        border-radius: 999px;
+        padding: 6px 14px;
+        font-weight: 800;
+        font-size: 13px;
+        box-shadow: 0 8px 18px rgba(2, 6, 23, 0.18);
+        max-width: min(50vw, 360px);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .bombones-view.open .bombones-current-folder {
+        display: inline-block;
+      }
+      .bombones-folders {
+        position: fixed;
+        top: 0;
+        right: 0;
+        z-index: 63;
+        width: min(320px, 84vw);
+        height: 100vh;
+        padding: 64px 14px 14px;
+        box-sizing: border-box;
+        background: linear-gradient(
+          180deg,
+          rgba(255, 251, 235, 0.98),
+          rgba(254, 243, 199, 0.96)
+        );
+        color: #422006;
+        box-shadow: -14px 0 30px rgba(2, 6, 23, 0.22);
+        transform: translateX(105%);
+        transition: transform 220ms ease;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        border-left: 1px solid rgba(180, 83, 9, 0.35);
+      }
+      .bombones-folders.open {
+        transform: translateX(0);
+      }
+      .bombones-folders h4 {
+        margin: 0 0 4px;
+        font-size: 14px;
+        letter-spacing: 0.6px;
+        text-transform: uppercase;
+        color: #7c2d12;
+        font-weight: 900;
+      }
+      .bombones-folders-close {
+        position: absolute;
+        top: 14px;
+        right: 14px;
+        border: 0;
+        border-radius: 999px;
+        width: 32px;
+        height: 32px;
+        font-size: 16px;
+        font-weight: 900;
+        cursor: pointer;
+        background: rgba(146, 64, 14, 0.15);
+        color: #422006;
+      }
+      .bombones-folder-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        overflow-y: auto;
+        flex: 1;
+      }
+      .bombones-folder-list li {
+        margin: 0;
+      }
+      .bombones-folder-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border: 0;
+        border-radius: 10px;
+        padding: 10px 12px;
+        font-weight: 800;
+        cursor: pointer;
+        background: rgba(217, 119, 6, 0.16);
+        color: #422006;
+        text-align: left;
+        font-family: inherit;
+        font-size: 14px;
+        width: 100%;
+        box-sizing: border-box;
+      }
+      .bombones-folder-item:hover {
+        background: rgba(217, 119, 6, 0.28);
+      }
+      .bombones-folder-item.active {
+        background: rgba(217, 119, 6, 0.45);
+        box-shadow: inset 0 0 0 2px rgba(146, 64, 14, 0.6);
+      }
+      .bombones-folder-icon {
+        font-size: 20px;
+        line-height: 1;
+      }
+      .bombones-folder-title {
+        flex: 1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .bombones-folders-empty {
+        margin: 8px 4px;
+        font-size: 12px;
+        line-height: 1.4;
+        color: #7c2d12;
+        opacity: 0.85;
       }
       .sync-status {
         position: fixed;
@@ -827,6 +1064,37 @@
       <button id="bombonesClose" class="bombones-close" type="button" aria-label="Cerrar">
         ✕
       </button>
+      <button
+        id="bombonesFoldersToggle"
+        class="bombones-folders-toggle"
+        type="button"
+        aria-label="Abrir carpetas"
+      >
+        📁 Carpetas
+      </button>
+      <div
+        id="bombonesCurrentFolder"
+        class="bombones-current-folder"
+        aria-live="polite"
+      >
+        📦 General
+      </div>
+      <aside
+        id="bombonesFolders"
+        class="bombones-folders"
+        aria-label="Carpetas de planes"
+      >
+        <button
+          id="bombonesFoldersClose"
+          class="bombones-folders-close"
+          type="button"
+          aria-label="Cerrar carpetas"
+        >
+          ✕
+        </button>
+        <h4>Carpetas</h4>
+        <ul id="bombonesFolderList" class="bombones-folder-list"></ul>
+      </aside>
       <div id="bombonesStage" class="bombones-stage">
         <img
           id="bombonesBoard"
@@ -985,6 +1253,11 @@
       const bombonesSmaller = document.getElementById("bombonesSmaller");
       const bombonesBigger = document.getElementById("bombonesBigger");
       const bombonesSize = document.getElementById("bombonesSize");
+      const bombonesFoldersToggle = document.getElementById("bombonesFoldersToggle");
+      const bombonesFolders = document.getElementById("bombonesFolders");
+      const bombonesFolderList = document.getElementById("bombonesFolderList");
+      const bombonesFoldersClose = document.getElementById("bombonesFoldersClose");
+      const bombonesCurrentFolder = document.getElementById("bombonesCurrentFolder");
       const abrasitoArea = document.getElementById("abrasitoArea");
       const syncStatus = document.getElementById("syncStatus");
       const connBadge = document.getElementById("connStatusBadge");
@@ -1012,6 +1285,9 @@
       let movies = [];
       let thoughts = [];
       let plans = [];
+      let currentBoardPlanId = null; // null = carpeta "General"
+      let bombonesSupportsFolders = true;
+      let bombonesSupportsNotes = true;
       const MOOD_STORAGE_KEY = "currentMood";
       const MOOD_REASON_STORAGE_KEY = "currentMoodReason";
       const MOOD_ROW_ID = 1;
@@ -1090,6 +1366,29 @@
         thoughtsSupportsReadReceipts = !error;
       }
 
+      async function detectBombonesSchemaSupport() {
+        const { error } = await supabaseClient
+          .from(BOMBONES_TABLE)
+          .select("id, plan_id, note")
+          .limit(1);
+        if (!error) {
+          bombonesSupportsFolders = true;
+          bombonesSupportsNotes = true;
+        } else {
+          const { error: planErr } = await supabaseClient
+            .from(BOMBONES_TABLE)
+            .select("id, plan_id")
+            .limit(1);
+          bombonesSupportsFolders = !planErr;
+          const { error: noteErr } = await supabaseClient
+            .from(BOMBONES_TABLE)
+            .select("id, note")
+            .limit(1);
+          bombonesSupportsNotes = !noteErr;
+        }
+        bombonesView?.classList.toggle("no-folders", !bombonesSupportsFolders);
+      }
+
       function openMovieMenu() {
         closePlanMenu();
         movieMenu.classList.add("loaded");
@@ -1148,54 +1447,97 @@
 
       function setupSwipeActions(item, { onEdit, onDelete }) {
         const SWIPE_THRESHOLD = 70;
+        const INTENT_THRESHOLD = 8;
         let startX = 0;
+        let startY = 0;
         let currentX = 0;
-        let isDragging = false;
+        let isPointerDown = false;
+        let horizontalIntent = false;
+        let activePointerId = null;
 
         const resetVisual = () => {
           item.style.transform = "translateX(0)";
           item.classList.remove("swiping-edit", "swiping-delete");
         };
 
-        item.addEventListener(
-          "touchstart",
-          (event) => {
-            if (!event.touches || event.touches.length !== 1) return;
-            startX = event.touches[0].clientX;
-            currentX = startX;
-            isDragging = true;
-          },
-          { passive: true }
-        );
-
-        item.addEventListener(
-          "touchmove",
-          (event) => {
-            if (!isDragging || !event.touches || event.touches.length !== 1) return;
-            currentX = event.touches[0].clientX;
-            const deltaX = Math.max(-90, Math.min(90, currentX - startX));
-            item.style.transform = `translateX(${deltaX}px)`;
-            item.classList.toggle("swiping-edit", deltaX > 24);
-            item.classList.toggle("swiping-delete", deltaX < -24);
-          },
-          { passive: true }
-        );
-
-        item.addEventListener("touchend", async () => {
-          if (!isDragging) return;
-          isDragging = false;
-          const deltaX = currentX - startX;
+        const cancelSwipe = () => {
+          isPointerDown = false;
+          horizontalIntent = false;
+          activePointerId = null;
           resetVisual();
+        };
+
+        item.addEventListener("pointerdown", (event) => {
+          // Solo botón principal del ratón y un único puntero activo.
+          if (event.pointerType === "mouse" && event.button !== 0) return;
+          if (activePointerId !== null) return;
+          // No iniciar swipe si se toca un control interactivo (checkbox, label, botón).
+          if (
+            event.target.closest(
+              'input, button, label, textarea, select, a[href]'
+            )
+          ) {
+            return;
+          }
+          activePointerId = event.pointerId;
+          startX = event.clientX;
+          startY = event.clientY;
+          currentX = startX;
+          isPointerDown = true;
+          horizontalIntent = false;
+        });
+
+        item.addEventListener("pointermove", (event) => {
+          if (!isPointerDown || event.pointerId !== activePointerId) return;
+          currentX = event.clientX;
+          const deltaX = currentX - startX;
+          const deltaY = event.clientY - startY;
+
+          if (!horizontalIntent) {
+            if (
+              Math.abs(deltaX) < INTENT_THRESHOLD &&
+              Math.abs(deltaY) < INTENT_THRESHOLD
+            ) {
+              return;
+            }
+            if (Math.abs(deltaY) > Math.abs(deltaX)) {
+              // El usuario está haciendo scroll vertical, dejamos pasar.
+              cancelSwipe();
+              return;
+            }
+            horizontalIntent = true;
+            try {
+              item.setPointerCapture(event.pointerId);
+            } catch (_) {}
+          }
+
+          if (event.cancelable) event.preventDefault();
+          const clamped = Math.max(-90, Math.min(90, deltaX));
+          item.style.transform = `translateX(${clamped}px)`;
+          item.classList.toggle("swiping-edit", deltaX > 24);
+          item.classList.toggle("swiping-delete", deltaX < -24);
+        });
+
+        const finishSwipe = async (event) => {
+          if (!isPointerDown || event.pointerId !== activePointerId) return;
+          const wasHorizontal = horizontalIntent;
+          const deltaX = currentX - startX;
+          isPointerDown = false;
+          horizontalIntent = false;
+          activePointerId = null;
+          resetVisual();
+          if (!wasHorizontal) return;
           if (deltaX >= SWIPE_THRESHOLD) {
             await onEdit();
           } else if (deltaX <= -SWIPE_THRESHOLD) {
             await onDelete();
           }
-        });
+        };
 
-        item.addEventListener("touchcancel", () => {
-          isDragging = false;
-          resetVisual();
+        item.addEventListener("pointerup", finishSwipe);
+        item.addEventListener("pointercancel", cancelSwipe);
+        item.addEventListener("lostpointercapture", () => {
+          if (isPointerDown) cancelSwipe();
         });
       }
 
@@ -1408,6 +1750,17 @@
           }))
           .filter((plan) => plan.title.length > 0);
         renderPlans();
+        // Si la vista de bombones existe, refrescamos las carpetas; si el plan
+        // actualmente seleccionado ya no está, switchBombonesBoard nos lleva a
+        // "General".
+        if (
+          currentBoardPlanId !== null &&
+          !plans.find((p) => p.id === currentBoardPlanId)
+        ) {
+          switchBombonesBoard(null);
+        } else {
+          renderBombonesFolders();
+        }
       }
 
       function renderThoughts() {
@@ -1718,6 +2071,7 @@
         if (!bombonesView) return;
         bombonesView.classList.add("open");
         bombonesView.setAttribute("aria-hidden", "false");
+        renderBombonesFolders();
         loadBombonesStickers();
       }
 
@@ -1725,6 +2079,7 @@
         if (!bombonesView) return;
         bombonesView.classList.remove("open");
         bombonesView.setAttribute("aria-hidden", "true");
+        closeBombonesFolders();
       }
 
       bombonesBtn?.addEventListener("click", openBombones);
@@ -1732,6 +2087,100 @@
       bombonesView?.addEventListener("click", (event) => {
         if (event.target === bombonesView) closeBombones();
       });
+
+      function renderBombonesFolders() {
+        if (!bombonesFolderList) return;
+        bombonesFolderList.innerHTML = "";
+        if (!bombonesSupportsFolders) {
+          const li = document.createElement("li");
+          li.className = "bombones-folders-empty";
+          li.textContent =
+            "Para usar carpetas, añade las columnas plan_id y note a la tabla bombones_stickers en Supabase.";
+          bombonesFolderList.appendChild(li);
+          updateBombonesCurrentFolderLabel();
+          return;
+        }
+        const entries = [
+          { id: null, title: "General", icon: "📦" },
+          ...plans.map((p) => ({
+            id: p.id,
+            title: p.title,
+            icon: p.done ? "✅" : "📁",
+          })),
+        ];
+        entries.forEach((entry) => {
+          const li = document.createElement("li");
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className =
+            "bombones-folder-item" +
+            (currentBoardPlanId === entry.id ? " active" : "");
+          const icon = document.createElement("span");
+          icon.className = "bombones-folder-icon";
+          icon.textContent = entry.icon;
+          const title = document.createElement("span");
+          title.className = "bombones-folder-title";
+          title.textContent = entry.title;
+          btn.appendChild(icon);
+          btn.appendChild(title);
+          btn.addEventListener("click", () => switchBombonesBoard(entry.id));
+          li.appendChild(btn);
+          bombonesFolderList.appendChild(li);
+        });
+        if (plans.length === 0) {
+          const hint = document.createElement("li");
+          hint.className = "bombones-folders-empty";
+          hint.textContent =
+            "Aún no hay planes. Crea planes desde el menú 📅 y aparecerán aquí como carpetas.";
+          bombonesFolderList.appendChild(hint);
+        }
+        updateBombonesCurrentFolderLabel();
+      }
+
+      function updateBombonesCurrentFolderLabel() {
+        if (!bombonesCurrentFolder) return;
+        if (!bombonesSupportsFolders) {
+          bombonesCurrentFolder.textContent = "Sin carpetas";
+          return;
+        }
+        if (currentBoardPlanId === null) {
+          bombonesCurrentFolder.textContent = "📦 General";
+        } else {
+          const plan = plans.find((p) => p.id === currentBoardPlanId);
+          bombonesCurrentFolder.textContent = `📁 ${
+            plan ? plan.title : "Carpeta"
+          }`;
+        }
+      }
+
+      async function switchBombonesBoard(planId) {
+        // Si el plan ya no existe, volvemos a General.
+        if (planId !== null && !plans.find((p) => p.id === planId)) {
+          planId = null;
+        }
+        currentBoardPlanId = planId;
+        renderBombonesFolders();
+        closeBombonesFolders();
+        await loadBombonesStickers();
+      }
+
+      function openBombonesFolders() {
+        if (!bombonesFolders) return;
+        renderBombonesFolders();
+        bombonesFolders.classList.add("open");
+      }
+      function closeBombonesFolders() {
+        bombonesFolders?.classList.remove("open");
+      }
+
+      bombonesFoldersToggle?.addEventListener("click", () => {
+        if (bombonesFolders?.classList.contains("open")) {
+          closeBombonesFolders();
+        } else {
+          openBombonesFolders();
+        }
+      });
+      bombonesFoldersClose?.addEventListener("click", closeBombonesFolders);
 
       function clamp(n, min, max) {
         return Math.max(min, Math.min(max, n));
@@ -1781,6 +2230,7 @@
         width = 160,
         rotation = 0,
         pinColor = null,
+        note = "",
       }) {
         const wrap = document.createElement("div");
         wrap.className = "bombones-sticker-wrap";
@@ -1797,6 +2247,16 @@
           ["c1", "c2", "c3", "c4", "c5"][Math.floor(Math.random() * 5)];
         pin.className = `bombones-pin ${color}`;
 
+        const flip = document.createElement("button");
+        flip.type = "button";
+        flip.className = "bombones-sticker-flip";
+        flip.title = "Girar para añadir una nota";
+        flip.setAttribute("aria-label", "Girar imagen");
+        flip.textContent = "↻";
+
+        const inner = document.createElement("div");
+        inner.className = "bombones-sticker-inner";
+
         const img = document.createElement("img");
         img.className = "bombones-sticker-img";
         img.src = imageUrl;
@@ -1804,11 +2264,76 @@
         img.decoding = "async";
         img.draggable = false;
 
+        const back = document.createElement("div");
+        back.className = "bombones-sticker-back";
+        const backTitle = document.createElement("p");
+        backTitle.className = "bombones-sticker-back-title";
+        backTitle.textContent = "Nota del momento";
+        const noteInput = document.createElement("textarea");
+        noteInput.className = "bombones-sticker-note";
+        noteInput.placeholder = "Escribe una nota sobre este momento...";
+        noteInput.value = typeof note === "string" ? note : "";
+        if (!bombonesSupportsNotes) {
+          noteInput.disabled = true;
+          noteInput.placeholder =
+            "Añade la columna `note` a bombones_stickers para guardar notas.";
+        }
+        back.appendChild(backTitle);
+        back.appendChild(noteInput);
+
+        inner.appendChild(img);
+        inner.appendChild(back);
+
         wrap.appendChild(pin);
-        wrap.appendChild(img);
+        wrap.appendChild(flip);
+        wrap.appendChild(inner);
+
+        // El botón de girar no debe disparar el arrastre del sticker.
+        flip.addEventListener("pointerdown", (e) => e.stopPropagation());
+        flip.addEventListener("pointerup", (e) => e.stopPropagation());
+        flip.addEventListener("dblclick", (e) => e.stopPropagation());
+        flip.addEventListener("click", (e) => {
+          e.stopPropagation();
+          wrap.classList.toggle("flipped");
+          if (wrap.classList.contains("flipped")) {
+            selectSticker(wrap);
+            setTimeout(() => {
+              try {
+                noteInput.focus();
+              } catch (_) {}
+            }, 280);
+          }
+        });
+
+        // El textarea tampoco debe iniciar drag ni borrar la imagen.
+        noteInput.addEventListener("pointerdown", (e) => e.stopPropagation());
+        noteInput.addEventListener("pointerup", (e) => e.stopPropagation());
+        noteInput.addEventListener("dblclick", (e) => e.stopPropagation());
+
+        let noteSaveTimer = null;
+        const persistNote = () => {
+          if (!bombonesSupportsNotes) return;
+          const sid = wrap.dataset.stickerId;
+          if (!sid) return;
+          updateBombonesSticker(sid, { note: noteInput.value });
+        };
+        noteInput.addEventListener("input", () => {
+          if (noteSaveTimer) clearTimeout(noteSaveTimer);
+          noteSaveTimer = setTimeout(persistNote, 500);
+        });
+        noteInput.addEventListener("blur", () => {
+          if (noteSaveTimer) clearTimeout(noteSaveTimer);
+          persistNote();
+        });
 
         wrap.addEventListener("pointerup", (e) => {
-          // evita selección al terminar un drag fuerte
+          if (
+            e.target.closest(
+              ".bombones-sticker-flip, .bombones-sticker-back"
+            )
+          ) {
+            return;
+          }
           if (Math.abs((e.clientX || 0) - (wrap._downX || 0)) > 6) return;
           selectSticker(wrap);
         });
@@ -1892,18 +2417,21 @@
         });
 
         sticker.addEventListener("pointerup", () => {
-          pointers.clear();
+          const wasDragging = dragging;
           const wasPinching = pinching;
+          pointers.clear();
           dragging = false;
           pinching = false;
-          const id = sticker.dataset.stickerId;
-          const rect = getStickerRectWithinStage(sticker);
-          if (id && rect) {
-            updateBombonesSticker(id, {
-              left: Math.round(rect.left),
-              top: Math.round(rect.top),
-              width: Math.round(rect.width),
-            });
+          if (wasDragging || wasPinching) {
+            const id = sticker.dataset.stickerId;
+            const rect = getStickerRectWithinStage(sticker);
+            if (id && rect) {
+              updateBombonesSticker(id, {
+                left: Math.round(rect.left),
+                top: Math.round(rect.top),
+                width: Math.round(rect.width),
+              });
+            }
           }
           if (wasPinching) selectSticker(sticker);
         });
@@ -1913,7 +2441,16 @@
           pinching = false;
         });
 
-        sticker.addEventListener("dblclick", () => {
+        sticker.addEventListener("dblclick", (event) => {
+          if (
+            event.target.closest(
+              ".bombones-sticker-flip, .bombones-sticker-back"
+            )
+          ) {
+            return;
+          }
+          const ok = window.confirm("¿Borrar esta imagen del corcho?");
+          if (!ok) return;
           const id = sticker.dataset.stickerId;
           sticker.remove();
           if (id) deleteBombonesStickerRecord(id);
@@ -2023,9 +2560,24 @@
 
       async function loadBombonesStickers() {
         if (!bombonesStickers) return;
-        const { data, error } = await supabaseClient
-          .from(BOMBONES_TABLE)
-          .select("id, image_url, left, top, width, rotation, pin_color, created_at")
+        const baseCols =
+          "id, image_url, left, top, width, rotation, pin_color, created_at";
+        const extraCols = [
+          bombonesSupportsFolders ? "plan_id" : null,
+          bombonesSupportsNotes ? "note" : null,
+        ].filter(Boolean);
+        const columns = extraCols.length
+          ? `${baseCols}, ${extraCols.join(", ")}`
+          : baseCols;
+        let query = supabaseClient.from(BOMBONES_TABLE).select(columns);
+        if (bombonesSupportsFolders) {
+          if (currentBoardPlanId === null) {
+            query = query.is("plan_id", null);
+          } else {
+            query = query.eq("plan_id", currentBoardPlanId);
+          }
+        }
+        const { data, error } = await query
           .order("created_at", { ascending: true, nullsFirst: true })
           .order("id", { ascending: true });
         if (error) {
@@ -2044,6 +2596,7 @@
             width: row.width,
             rotation: row.rotation,
             pinColor: row.pin_color || null,
+            note: typeof row.note === "string" ? row.note : "",
           });
           bombonesStickers.appendChild(wrap);
           makeStickerDraggable(wrap);
@@ -2111,6 +2664,9 @@
               width: Math.round(rect.width),
               rotation,
               pin_color: pinColor,
+              ...(bombonesSupportsFolders
+                ? { plan_id: currentBoardPlanId }
+                : {}),
             });
             if (!id) throw new Error("No se pudo guardar el registro.");
             tmp.dataset.stickerId = String(id);
@@ -2228,6 +2784,7 @@
 
       (async () => {
         await detectReadReceiptsSupport();
+        await detectBombonesSchemaSupport();
         await loadMovies();
         await loadPlans();
         await loadMood();
