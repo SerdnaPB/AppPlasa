@@ -433,13 +433,13 @@
         inset: 0;
         z-index: 60;
         display: none;
-        background: #ffffff;
+        background: #2b1d12;
         padding: 0;
         box-sizing: border-box;
+        overflow: hidden;
       }
       .bombones-view.open {
-        display: grid;
-        place-items: center;
+        display: block;
       }
       .bombones-close {
         position: fixed;
@@ -457,18 +457,18 @@
         box-shadow: 0 10px 28px rgba(2, 6, 23, 0.12);
       }
       .bombones-stage {
-        width: 100vw;
-        height: 100vh;
-        position: relative;
-        display: grid;
-        place-items: center;
+        position: absolute;
+        inset: 0;
       }
       .bombones-board {
+        position: absolute;
+        inset: 0;
         width: 100%;
         height: 100%;
         object-fit: cover;
         border-radius: 0;
         box-shadow: none;
+        display: block;
       }
       .bombones-stickers {
         position: absolute;
@@ -586,24 +586,43 @@
       }
       .bombones-pin {
         position: absolute;
-        top: -10px;
-        left: 14px;
-        width: 16px;
-        height: 16px;
+        top: -5px;
+        left: 10px;
+        width: 10px;
+        height: 10px;
         border-radius: 50%;
-        box-shadow: 0 8px 18px rgba(2, 6, 23, 0.28);
-        border: 2px solid rgba(255, 255, 255, 0.7);
+        border: 0;
+        z-index: 5;
+        box-shadow:
+          inset -1.5px -1.5px 2.5px rgba(0, 0, 0, 0.5),
+          inset 1.5px 1.5px 2px rgba(255, 255, 255, 0.6),
+          0 2px 4px rgba(2, 6, 23, 0.55);
+      }
+      .bombones-pin::before {
+        content: "";
+        position: absolute;
+        top: 1.5px;
+        left: 2px;
+        width: 3px;
+        height: 2px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.92);
+        filter: blur(0.3px);
       }
       .bombones-pin::after {
         content: "";
         position: absolute;
         left: 50%;
-        top: 14px;
+        top: 8px;
         transform: translateX(-50%);
-        width: 2px;
-        height: 14px;
-        background: rgba(2, 6, 23, 0.45);
-        border-radius: 2px;
+        width: 1.4px;
+        height: 7px;
+        background: linear-gradient(
+          180deg,
+          rgba(40, 40, 40, 0.85) 0%,
+          rgba(40, 40, 40, 0.25) 100%
+        );
+        border-radius: 0 0 1px 1px;
       }
       .bombones-pin.c1 { background: #fb7185; } /* rosa */
       .bombones-pin.c2 { background: #60a5fa; } /* azul */
@@ -693,6 +712,23 @@
       .bombones-view.no-folders .bombones-folders {
         display: none !important;
       }
+      .bombones-folders-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 63;
+        display: none;
+        background: rgba(2, 6, 23, 0.45);
+        -webkit-backdrop-filter: blur(2px);
+        backdrop-filter: blur(2px);
+      }
+      .bombones-folders-backdrop.open {
+        display: block;
+      }
+      .bombones-view.folders-open .bombones-folders-toggle,
+      .bombones-view.folders-open .bombones-current-folder,
+      .bombones-view.folders-open .bombones-close {
+        display: none !important;
+      }
       .bombones-current-folder {
         position: fixed;
         top: 18px;
@@ -720,7 +756,7 @@
         position: fixed;
         top: 0;
         right: 0;
-        z-index: 63;
+        z-index: 64;
         width: min(320px, 84vw);
         height: 100vh;
         padding: 64px 14px 14px;
@@ -1079,6 +1115,10 @@
       >
         📦 General
       </div>
+      <div
+        id="bombonesFoldersBackdrop"
+        class="bombones-folders-backdrop"
+      ></div>
       <aside
         id="bombonesFolders"
         class="bombones-folders"
@@ -1258,6 +1298,9 @@
       const bombonesFolderList = document.getElementById("bombonesFolderList");
       const bombonesFoldersClose = document.getElementById("bombonesFoldersClose");
       const bombonesCurrentFolder = document.getElementById("bombonesCurrentFolder");
+      const bombonesFoldersBackdrop = document.getElementById(
+        "bombonesFoldersBackdrop"
+      );
       const abrasitoArea = document.getElementById("abrasitoArea");
       const syncStatus = document.getElementById("syncStatus");
       const connBadge = document.getElementById("connStatusBadge");
@@ -1750,17 +1793,16 @@
           }))
           .filter((plan) => plan.title.length > 0);
         renderPlans();
-        // Si la vista de bombones existe, refrescamos las carpetas; si el plan
-        // actualmente seleccionado ya no está, switchBombonesBoard nos lleva a
-        // "General".
-        if (
-          currentBoardPlanId !== null &&
-          !plans.find((p) => p.id === currentBoardPlanId)
-        ) {
-          switchBombonesBoard(null);
-        } else {
-          renderBombonesFolders();
+        // Si el plan actualmente seleccionado ya no existe o ha dejado de estar
+        // marcado como hecho, volvemos automáticamente a la carpeta General.
+        if (currentBoardPlanId !== null) {
+          const activePlan = plans.find((p) => p.id === currentBoardPlanId);
+          if (!activePlan || !activePlan.done) {
+            switchBombonesBoard(null);
+            return;
+          }
         }
+        renderBombonesFolders();
       }
 
       function renderThoughts() {
@@ -2100,12 +2142,13 @@
           updateBombonesCurrentFolderLabel();
           return;
         }
+        const donePlans = plans.filter((p) => p.done);
         const entries = [
           { id: null, title: "General", icon: "📦" },
-          ...plans.map((p) => ({
+          ...donePlans.map((p) => ({
             id: p.id,
             title: p.title,
-            icon: p.done ? "✅" : "📁",
+            icon: "📁",
           })),
         ];
         entries.forEach((entry) => {
@@ -2127,11 +2170,11 @@
           li.appendChild(btn);
           bombonesFolderList.appendChild(li);
         });
-        if (plans.length === 0) {
+        if (donePlans.length === 0) {
           const hint = document.createElement("li");
           hint.className = "bombones-folders-empty";
           hint.textContent =
-            "Aún no hay planes. Crea planes desde el menú 📅 y aparecerán aquí como carpetas.";
+            "Aún no hay planes marcados como hechos. Marca planes con ✅ Hecho en el menú 📅 y aparecerán aquí como carpetas.";
           bombonesFolderList.appendChild(hint);
         }
         updateBombonesCurrentFolderLabel();
@@ -2154,9 +2197,10 @@
       }
 
       async function switchBombonesBoard(planId) {
-        // Si el plan ya no existe, volvemos a General.
-        if (planId !== null && !plans.find((p) => p.id === planId)) {
-          planId = null;
+        // Si el plan ya no existe o ya no está marcado como hecho, volvemos a General.
+        if (planId !== null) {
+          const plan = plans.find((p) => p.id === planId);
+          if (!plan || !plan.done) planId = null;
         }
         currentBoardPlanId = planId;
         renderBombonesFolders();
@@ -2168,9 +2212,13 @@
         if (!bombonesFolders) return;
         renderBombonesFolders();
         bombonesFolders.classList.add("open");
+        bombonesFoldersBackdrop?.classList.add("open");
+        bombonesView?.classList.add("folders-open");
       }
       function closeBombonesFolders() {
         bombonesFolders?.classList.remove("open");
+        bombonesFoldersBackdrop?.classList.remove("open");
+        bombonesView?.classList.remove("folders-open");
       }
 
       bombonesFoldersToggle?.addEventListener("click", () => {
@@ -2181,6 +2229,7 @@
         }
       });
       bombonesFoldersClose?.addEventListener("click", closeBombonesFolders);
+      bombonesFoldersBackdrop?.addEventListener("click", closeBombonesFolders);
 
       function clamp(n, min, max) {
         return Math.max(min, Math.min(max, n));
