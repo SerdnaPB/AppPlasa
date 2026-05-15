@@ -1503,8 +1503,8 @@
       <section id="flightsPanel" class="flights-panel" aria-label="Buscar vuelos">
         <h3>Vuelos de fin de semana</h3>
         <p class="flights-panel-hint">
-          Vie–dom desde hoy hasta dentro de un mes. Cada fin de semana abre
-          Vueling o Ryanair con las fechas ya puestas (ida viernes, vuelta domingo).
+          Vie–dom desde hoy hasta dentro de un mes. Vueling y Ryanair abren con
+          fechas ya puestas (ida viernes, vuelta domingo).
         </p>
         <div class="flights-route-row">
           <button
@@ -2488,7 +2488,9 @@
           c: "es-ES",
           cur: "EUR",
         });
-        return `https://www.vueling.com/es/book-your-flight/find-your-flight?${params.toString()}`;
+        // La ruta /es/book-your-flight/ devuelve 404 ("página de vacaciones").
+        // La búsqueda con parámetros funciona en /en/... con c=es-ES (interfaz en español).
+        return `https://www.vueling.com/en/book-your-flight/find-your-flight?${params.toString()}`;
       }
 
       function ryanairWeekendUrl(routeKey, depart, returnDate) {
