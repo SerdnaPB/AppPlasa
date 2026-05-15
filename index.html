@@ -428,6 +428,141 @@
         transform: translateY(1px) scale(0.99);
         filter: brightness(0.96);
       }
+      .flights-btn {
+        width: min(560px, 92vw);
+        border: 0;
+        border-radius: 16px;
+        padding: 14px 18px;
+        font-size: clamp(16px, 3vw, 22px);
+        font-weight: 800;
+        cursor: pointer;
+        background: linear-gradient(135deg, #93c5fd, #60a5fa);
+        color: #0c4a6e;
+        box-shadow: 0 14px 34px rgba(37, 99, 235, 0.35);
+        transition: transform 120ms ease, filter 120ms ease;
+      }
+      .flights-btn:active {
+        transform: translateY(1px) scale(0.99);
+        filter: brightness(0.96);
+      }
+      .flights-panel {
+        width: min(560px, 92vw);
+        display: none;
+        border-radius: 18px;
+        padding: 14px 16px;
+        background: linear-gradient(
+          135deg,
+          rgba(191, 219, 254, 0.35),
+          rgba(125, 211, 252, 0.28)
+        );
+        border: 1px solid rgba(96, 165, 250, 0.55);
+        color: #f0f9ff;
+        box-sizing: border-box;
+        box-shadow: 0 14px 36px rgba(37, 99, 235, 0.22);
+      }
+      .flights-panel.open {
+        display: grid;
+        gap: 10px;
+      }
+      .flights-panel h3 {
+        margin: 0;
+        font-size: clamp(16px, 3vw, 22px);
+        font-weight: 800;
+        color: #e0f2fe;
+      }
+      .flights-panel-hint {
+        margin: 0;
+        font-size: 12px;
+        line-height: 1.35;
+        opacity: 0.92;
+      }
+      .flights-route-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+      .flights-route-btn {
+        border: 0;
+        border-radius: 12px;
+        padding: 12px 10px;
+        font-weight: 800;
+        font-size: 14px;
+        cursor: pointer;
+        font-family: inherit;
+        background: rgba(14, 165, 233, 0.35);
+        color: #f0f9ff;
+        transition: background 140ms ease, transform 120ms ease;
+      }
+      .flights-route-btn:hover {
+        background: rgba(14, 165, 233, 0.55);
+      }
+      .flights-route-btn.active {
+        background: rgba(37, 99, 235, 0.75);
+        box-shadow: inset 0 0 0 2px rgba(224, 242, 254, 0.45);
+      }
+      .flights-results {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        gap: 8px;
+        max-height: 42vh;
+        overflow-y: auto;
+      }
+      .flights-weekend-item {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 8px;
+        align-items: center;
+        background: rgba(15, 23, 42, 0.28);
+        border-radius: 10px;
+        padding: 10px 12px;
+      }
+      .flights-weekend-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        min-width: 96px;
+      }
+      .flights-weekend-dates {
+        font-weight: 700;
+        font-size: 14px;
+      }
+      .flights-weekend-meta {
+        font-size: 11px;
+        opacity: 0.85;
+        margin-top: 2px;
+      }
+      .flights-weekend-link {
+        border: 0;
+        border-radius: 999px;
+        padding: 8px 10px;
+        font-weight: 800;
+        font-size: 11px;
+        cursor: pointer;
+        text-decoration: none;
+        white-space: nowrap;
+        text-align: center;
+        font-family: inherit;
+        display: block;
+      }
+      .flights-weekend-link.vueling {
+        background: #ffcc00;
+        color: #1a1a1a;
+      }
+      .flights-weekend-link.ryanair {
+        background: #073590;
+        color: #f8fafc;
+      }
+      .flights-close-btn {
+        border: 0;
+        border-radius: 10px;
+        padding: 10px 12px;
+        font-weight: 700;
+        cursor: pointer;
+        background: rgba(15, 23, 42, 0.35);
+        color: #e0f2fe;
+      }
       .bombones-view {
         position: fixed;
         inset: 0;
@@ -1364,6 +1499,36 @@
       <button id="bombonesBtn" class="bombones-btn" type="button">
         La cajita de bombones 🍫
       </button>
+      <button id="flightsBtn" class="flights-btn" type="button">Vuelos ✈️</button>
+      <section id="flightsPanel" class="flights-panel" aria-label="Buscar vuelos">
+        <h3>Vuelos de fin de semana</h3>
+        <p class="flights-panel-hint">
+          Vie–dom desde hoy hasta dentro de un mes. Cada fin de semana abre
+          Vueling o Ryanair con las fechas ya puestas (ida viernes, vuelta domingo).
+        </p>
+        <div class="flights-route-row">
+          <button
+            id="flightsRouteBcnSvq"
+            class="flights-route-btn active"
+            type="button"
+            data-route="bcn-svq"
+          >
+            Barcelona → Sevilla
+          </button>
+          <button
+            id="flightsRouteSvqBcn"
+            class="flights-route-btn"
+            type="button"
+            data-route="svq-bcn"
+          >
+            Sevilla → Barcelona
+          </button>
+        </div>
+        <ul id="flightsResults" class="flights-results"></ul>
+        <button id="flightsCloseBtn" class="flights-close-btn" type="button">
+          Cerrar
+        </button>
+      </section>
       <div id="abrasitoArea" class="abrasito-area">
         <div id="countdown" class="countdown">
           <p class="countdown-title">Tiempo para vernos (como máx)</p>
@@ -1421,6 +1586,12 @@
       const needAlertTime = document.getElementById("needAlertTime");
       const needAlertDismiss = document.getElementById("needAlertDismiss");
       const bombonesBtn = document.getElementById("bombonesBtn");
+      const flightsBtn = document.getElementById("flightsBtn");
+      const flightsPanel = document.getElementById("flightsPanel");
+      const flightsResults = document.getElementById("flightsResults");
+      const flightsCloseBtn = document.getElementById("flightsCloseBtn");
+      const flightsRouteBcnSvq = document.getElementById("flightsRouteBcnSvq");
+      const flightsRouteSvqBcn = document.getElementById("flightsRouteSvqBcn");
       const bombonesView = document.getElementById("bombonesView");
       const bombonesClose = document.getElementById("bombonesClose");
       const bombonesUpload = document.getElementById("bombonesUpload");
@@ -1462,6 +1633,7 @@
       const BOMBONES_BUCKET = "bombones";
       const NOTIFICATIONS_TABLE = "notifications";
       const NOTIFY_COOLDOWN_MS = 5000;
+      const SEEN_NOTIFICATIONS_KEY = "seenNotificationIds";
 
       // Fecha objetivo del countdown: 21 de mayo de 2026 a las 22:00 (hora local).
       const COUNTDOWN_TARGET = new Date(2026, 4, 21, 22, 0, 0, 0).getTime();
@@ -2245,6 +2417,238 @@
       });
 
       let lastNotifySend = 0;
+      let currentNeedNotificationId = null;
+      let activeFlightsRoute = "bcn-svq";
+
+      const FLIGHT_ROUTES = {
+        "bcn-svq": {
+          origin: "BCN",
+          destination: "SVQ",
+          label: "Barcelona → Sevilla",
+          airports: "BCN → SVQ",
+        },
+        "svq-bcn": {
+          origin: "SVQ",
+          destination: "BCN",
+          label: "Sevilla → Barcelona",
+          airports: "SVQ → BCN",
+        },
+      };
+
+      function formatDateEs(date) {
+        return date.toLocaleDateString("es-ES", {
+          weekday: "short",
+          day: "numeric",
+          month: "short",
+        });
+      }
+
+      function formatIsoDate(date) {
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, "0");
+        const d = String(date.getDate()).padStart(2, "0");
+        return `${y}-${m}-${d}`;
+      }
+
+      function getFridaySundayWeekends(monthsAhead = 1) {
+        const start = new Date();
+        start.setHours(0, 0, 0, 0);
+        const end = new Date(start);
+        end.setMonth(end.getMonth() + monthsAhead);
+        const weekends = [];
+        const cursor = new Date(start);
+        while (cursor.getDay() !== 5) {
+          cursor.setDate(cursor.getDate() + 1);
+        }
+        while (cursor <= end) {
+          const friday = new Date(cursor);
+          const sunday = new Date(cursor);
+          sunday.setDate(sunday.getDate() + 2);
+          if (friday >= start && sunday <= end) {
+            weekends.push({ depart: friday, return: sunday });
+          }
+          cursor.setDate(cursor.getDate() + 7);
+        }
+        return weekends;
+      }
+
+      function vuelingWeekendUrl(routeKey, depart, returnDate) {
+        const route = FLIGHT_ROUTES[routeKey];
+        if (!route) return "#";
+        const dd = formatIsoDate(depart);
+        const rd = formatIsoDate(returnDate);
+        const params = new URLSearchParams({
+          o: route.origin,
+          d: route.destination,
+          dd,
+          rd,
+          adt: "1",
+          chd: "0",
+          inf: "0",
+          c: "es-ES",
+          cur: "EUR",
+        });
+        return `https://www.vueling.com/es/book-your-flight/find-your-flight?${params.toString()}`;
+      }
+
+      function ryanairWeekendUrl(routeKey, depart, returnDate) {
+        const route = FLIGHT_ROUTES[routeKey];
+        if (!route) return "#";
+        const dateOut = formatIsoDate(depart);
+        const dateIn = formatIsoDate(returnDate);
+        const params = new URLSearchParams({
+          adults: "1",
+          teens: "0",
+          children: "0",
+          infants: "0",
+          dateOut,
+          dateIn,
+          isConnectedFlight: "false",
+          discount: "0",
+          promoCode: "",
+          originIata: route.origin,
+          destinationIata: route.destination,
+          tpAdults: "1",
+          tpTeens: "0",
+          tpChildren: "0",
+          tpInfants: "0",
+          tpStartDate: dateOut,
+          tpEndDate: dateIn,
+          tpDiscount: "0",
+          tpPromoCode: "",
+          tpOriginIata: route.origin,
+          tpDestinationIata: route.destination,
+        });
+        return `https://www.ryanair.com/es/es/trip/flights/select?${params.toString()}`;
+      }
+
+      function renderFlightsWeekends(routeKey = activeFlightsRoute) {
+        if (!flightsResults) return;
+        activeFlightsRoute = routeKey;
+        const route = FLIGHT_ROUTES[routeKey];
+        const weekends = getFridaySundayWeekends(1);
+        flightsResults.innerHTML = "";
+        if (!weekends.length) {
+          const li = document.createElement("li");
+          li.className = "flights-panel-hint";
+          li.textContent = "No hay fines de semana completos en el próximo mes.";
+          flightsResults.appendChild(li);
+          return;
+        }
+        weekends.forEach((trip) => {
+          const li = document.createElement("li");
+          li.className = "flights-weekend-item";
+          const info = document.createElement("div");
+          const title = document.createElement("div");
+          title.className = "flights-weekend-dates";
+          title.textContent = `${formatDateEs(trip.depart)} → ${formatDateEs(
+            trip.return
+          )}`;
+          const meta = document.createElement("div");
+          meta.className = "flights-weekend-meta";
+          meta.textContent = `${route.airports} · ida vie, vuelta dom`;
+          info.appendChild(title);
+          info.appendChild(meta);
+          const actions = document.createElement("div");
+          actions.className = "flights-weekend-actions";
+          const vuelingLink = document.createElement("a");
+          vuelingLink.className = "flights-weekend-link vueling";
+          vuelingLink.href = vuelingWeekendUrl(
+            routeKey,
+            trip.depart,
+            trip.return
+          );
+          vuelingLink.target = "_blank";
+          vuelingLink.rel = "noopener noreferrer";
+          vuelingLink.textContent = "Vueling";
+          const ryanairLink = document.createElement("a");
+          ryanairLink.className = "flights-weekend-link ryanair";
+          ryanairLink.href = ryanairWeekendUrl(
+            routeKey,
+            trip.depart,
+            trip.return
+          );
+          ryanairLink.target = "_blank";
+          ryanairLink.rel = "noopener noreferrer";
+          ryanairLink.textContent = "Ryanair";
+          actions.appendChild(vuelingLink);
+          actions.appendChild(ryanairLink);
+          li.appendChild(info);
+          li.appendChild(actions);
+          flightsResults.appendChild(li);
+        });
+      }
+
+      function setActiveFlightsRoute(routeKey) {
+        flightsRouteBcnSvq?.classList.toggle("active", routeKey === "bcn-svq");
+        flightsRouteSvqBcn?.classList.toggle("active", routeKey === "svq-bcn");
+        renderFlightsWeekends(routeKey);
+      }
+
+      function openFlightsPanel() {
+        flightsPanel?.classList.add("open");
+        setActiveFlightsRoute(activeFlightsRoute);
+      }
+
+      function closeFlightsPanel() {
+        flightsPanel?.classList.remove("open");
+      }
+
+      flightsBtn?.addEventListener("click", () => {
+        if (flightsPanel?.classList.contains("open")) {
+          closeFlightsPanel();
+        } else {
+          openFlightsPanel();
+        }
+      });
+      flightsCloseBtn?.addEventListener("click", closeFlightsPanel);
+      flightsRouteBcnSvq?.addEventListener("click", () =>
+        setActiveFlightsRoute("bcn-svq")
+      );
+      flightsRouteSvqBcn?.addEventListener("click", () =>
+        setActiveFlightsRoute("svq-bcn")
+      );
+
+      function getSeenNotificationIds() {
+        try {
+          const raw = localStorage.getItem(SEEN_NOTIFICATIONS_KEY);
+          const arr = raw ? JSON.parse(raw) : [];
+          return new Set(
+            (Array.isArray(arr) ? arr : [])
+              .map((id) => Number(id))
+              .filter((id) => Number.isFinite(id))
+          );
+        } catch {
+          return new Set();
+        }
+      }
+
+      function markNotificationSeen(id) {
+        if (id == null) return;
+        const seen = getSeenNotificationIds();
+        seen.add(Number(id));
+        const trimmed = [...seen].slice(-200);
+        localStorage.setItem(SEEN_NOTIFICATIONS_KEY, JSON.stringify(trimmed));
+        if (currentNeedNotificationId === Number(id)) {
+          currentNeedNotificationId = null;
+        }
+      }
+
+      async function checkPendingNeedNotifications() {
+        const { data, error } = await supabaseClient
+          .from(NOTIFICATIONS_TABLE)
+          .select("id, author_id, created_at")
+          .neq("author_id", CLIENT_ID)
+          .order("created_at", { ascending: false, nullsFirst: false })
+          .order("id", { ascending: false })
+          .limit(30);
+        if (error) return;
+        const seen = getSeenNotificationIds();
+        const pending = (data || []).find(
+          (row) => row?.id != null && !seen.has(Number(row.id))
+        );
+        if (pending) showNeedAlertFromRow(pending);
+      }
 
       async function ensureNotificationPermission() {
         if (!("Notification" in window)) return "unsupported";
@@ -2303,6 +2707,9 @@
         if (!row || !needAlert) return;
         const fromSelf = row.author_id === CLIENT_ID;
         if (fromSelf) return; // Al emisor sólo le mostramos el toast de "enviado".
+        if (row.id != null) {
+          currentNeedNotificationId = Number(row.id);
+        }
         if (needAlertTime) {
           needAlertTime.textContent = formatRelativeFromNow(
             row.created_at || new Date()
@@ -2324,6 +2731,9 @@
         if (!needAlert) return;
         needAlert.classList.remove("show");
         needAlert.setAttribute("aria-hidden", "true");
+        if (currentNeedNotificationId != null) {
+          markNotificationSeen(currentNeedNotificationId);
+        }
       }
 
       needAlertDismiss?.addEventListener("click", hideNeedAlert);
@@ -3111,6 +3521,10 @@
           .catch(() => {});
       }
 
+      document.addEventListener("visibilitychange", () => {
+        if (!document.hidden) checkPendingNeedNotifications();
+      });
+
       (async () => {
         await detectReadReceiptsSupport();
         await detectBombonesSchemaSupport();
@@ -3118,6 +3532,7 @@
         await loadPlans();
         await loadMood();
         subscribeRealtime();
+        await checkPendingNeedNotifications();
         unregisterServiceWorkers();
       })();
 
@@ -3138,6 +3553,8 @@
         moodCard.style.display = "none";
         notifyBtn.style.display = "none";
         if (bombonesBtn) bombonesBtn.style.display = "none";
+        if (flightsBtn) flightsBtn.style.display = "none";
+        closeFlightsPanel();
         menuToggle.style.display = "none";
         planToggle.style.display = "none";
         closeMovieMenu();
