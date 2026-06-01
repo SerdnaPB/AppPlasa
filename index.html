@@ -1242,16 +1242,31 @@
         }
       }
       .thoughts-card {
-        border-radius: 16px;
-        padding: 14px;
-        background: rgba(2, 6, 23, 0.5);
-        border: 1px solid rgba(167, 139, 250, 0.45);
-        color: #f8fafc;
+        border-radius: 18px;
+        padding: 14px 16px;
+        background: linear-gradient(
+          145deg,
+          rgba(248, 183, 194, 0.18),
+          rgba(196, 181, 253, 0.28) 55%,
+          rgba(45, 27, 78, 0.55)
+        );
+        border: 1px solid rgba(248, 183, 194, 0.42);
+        color: var(--text-on-dark);
         box-sizing: border-box;
+        box-shadow: 0 14px 36px rgba(124, 58, 237, 0.22),
+          inset 0 1px 0 rgba(255, 255, 255, 0.12);
       }
       .thoughts-card h3 {
         margin: 0 0 10px;
         font-size: clamp(16px, 3vw, 22px);
+        font-weight: 800;
+        color: #faf5ff;
+        text-shadow: 0 2px 10px rgba(124, 58, 237, 0.35);
+      }
+      .thoughts-card .swipe-hint {
+        color: rgba(250, 245, 255, 0.95);
+        background: rgba(45, 27, 78, 0.35);
+        border-color: rgba(196, 181, 253, 0.4);
       }
       .thoughts-input-row {
         display: grid;
@@ -1260,22 +1275,32 @@
         margin-bottom: 10px;
       }
       .thoughts-input-row textarea {
-        border: 1px solid rgba(167, 139, 250, 0.55);
-        border-radius: 10px;
+        border: 1px solid rgba(248, 183, 194, 0.55);
+        border-radius: 12px;
         padding: 10px 12px;
-        background: rgba(248, 250, 252, 0.44);
-        color: #111827;
+        background: rgba(255, 248, 231, 0.92);
+        color: #4a1942;
         resize: vertical;
         min-height: 86px;
       }
+      .thoughts-input-row textarea:focus {
+        outline: none;
+        border-color: var(--rose-accent);
+        box-shadow: 0 0 0 3px rgba(232, 121, 169, 0.3);
+      }
       .thoughts-input-row button {
         border: 0;
-        border-radius: 10px;
+        border-radius: 12px;
         padding: 10px 12px;
-        font-weight: 700;
+        font-weight: 800;
         cursor: pointer;
-        background: rgba(34, 197, 94, 0.58);
-        color: #111827;
+        background: linear-gradient(
+          135deg,
+          var(--rose-soft),
+          var(--rose-accent)
+        );
+        color: #4a1942;
+        box-shadow: 0 8px 20px rgba(232, 121, 169, 0.35);
       }
       .thoughts-list {
         list-style: none;
@@ -1300,14 +1325,14 @@
       }
       .thought-item.mine {
         align-self: flex-end;
-        background: linear-gradient(135deg, #4ade80, #22c55e);
-        color: #052e16;
+        background: linear-gradient(135deg, #fce7f3, var(--rose-soft), var(--rose-accent));
+        color: #4a1942;
         border-bottom-right-radius: 6px;
       }
       .thought-item.other {
         align-self: flex-start;
-        background: linear-gradient(135deg, #c4b5fd, #f9a8d4);
-        color: #2e1065;
+        background: linear-gradient(135deg, #ede9fe, var(--lavender), #f9a8d4);
+        color: #3b0764;
         border-bottom-left-radius: 6px;
       }
       .thought-item.mine::after,
@@ -1349,79 +1374,70 @@
           max-width: 200px;
         }
       }
-      .pwa-install {
+      .app-loader {
         position: fixed;
-        left: 50%;
-        bottom: 16px;
-        transform: translateX(-50%);
-        z-index: 70;
-        width: min(520px, 94vw);
-        display: none;
+        inset: 0;
+        z-index: 90;
+        display: flex;
         align-items: center;
-        gap: 12px;
-        padding: 12px 14px;
-        border-radius: 18px;
+        justify-content: center;
         background: linear-gradient(
-          135deg,
-          rgba(45, 27, 78, 0.97),
-          rgba(26, 15, 46, 0.98)
+          165deg,
+          rgba(26, 15, 46, 0.97),
+          rgba(18, 8, 24, 0.98)
         );
-        border: 1px solid rgba(248, 183, 194, 0.45);
-        box-shadow: 0 18px 48px rgba(0, 0, 0, 0.45);
-        color: var(--text-on-dark);
+        backdrop-filter: blur(8px);
+        transition: opacity 400ms ease, visibility 400ms ease;
       }
-      .pwa-install.show {
-        display: flex;
+      .app-loader.hidden {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
       }
-      .pwa-install-icon {
-        width: 48px;
-        height: 48px;
-        border-radius: 12px;
-        flex-shrink: 0;
-        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+      .app-loader-card {
+        width: min(320px, 88vw);
+        padding: 28px 24px;
+        border-radius: 22px;
+        text-align: center;
+        background: linear-gradient(
+          145deg,
+          rgba(248, 183, 194, 0.15),
+          rgba(196, 181, 253, 0.22)
+        );
+        border: 1px solid rgba(248, 183, 194, 0.4);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
       }
-      .pwa-install-copy {
-        flex: 1;
-        min-width: 0;
+      .app-loader-icon {
+        width: 64px;
+        height: 64px;
+        border-radius: 16px;
+        margin-bottom: 12px;
+        box-shadow: 0 8px 24px rgba(232, 121, 169, 0.35);
       }
-      .pwa-install-copy strong {
-        display: block;
-        font-size: 14px;
-        margin-bottom: 2px;
+      .app-loader-title {
+        margin: 0 0 16px;
+        font-size: 20px;
+        font-weight: 900;
+        color: #faf5ff;
       }
-      .pwa-install-copy span {
-        display: block;
-        font-size: 11px;
-        opacity: 0.88;
-        line-height: 1.3;
-      }
-      .pwa-install-actions {
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-        flex-shrink: 0;
-      }
-      .pwa-install-primary {
-        border: 0;
+      .app-loader-bar {
+        height: 6px;
         border-radius: 999px;
-        padding: 8px 14px;
-        font-weight: 800;
-        font-size: 12px;
-        cursor: pointer;
-        background: linear-gradient(135deg, var(--rose-soft), var(--rose-accent));
-        color: #4a1942;
-        font-family: inherit;
+        background: rgba(45, 27, 78, 0.6);
+        overflow: hidden;
+        margin-bottom: 10px;
       }
-      .pwa-install-dismiss {
-        border: 0;
-        border-radius: 999px;
-        padding: 6px 10px;
-        font-weight: 700;
-        font-size: 11px;
-        cursor: pointer;
-        background: rgba(255, 255, 255, 0.1);
-        color: #ede9fe;
-        font-family: inherit;
+      .app-loader-bar-fill {
+        height: 100%;
+        width: 0%;
+        border-radius: inherit;
+        background: linear-gradient(90deg, var(--rose-soft), var(--lavender));
+        transition: width 280ms ease;
+      }
+      .app-loader-status {
+        margin: 0;
+        font-size: 13px;
+        color: rgba(250, 245, 255, 0.88);
       }
     </style>
   </head>
@@ -1446,28 +1462,20 @@
     <div id="planBackdrop" class="menu-backdrop"></div>
     <div id="connStatusBadge" class="conn-pill" aria-live="polite">Desconectado</div>
     <div id="syncStatus" class="sync-status"></div>
-    <div id="pwaInstall" class="pwa-install" role="dialog" aria-label="Instalar app">
-      <img
-        id="pwaInstallIcon"
-        class="pwa-install-icon"
-        src="/AppPlasa/android-chrome-192x192.png"
-        alt=""
-        width="48"
-        height="48"
-      />
-      <div class="pwa-install-copy">
-        <strong>Instalar Abrasito</strong>
-        <span id="pwaInstallHint"
-          >En el móvil: icono en la pantalla de inicio y fotos precargadas.</span
-        >
-      </div>
-      <div class="pwa-install-actions">
-        <button id="pwaInstallBtn" class="pwa-install-primary" type="button">
-          Instalar
-        </button>
-        <button id="pwaInstallDismiss" class="pwa-install-dismiss" type="button">
-          Ahora no
-        </button>
+    <div id="appLoader" class="app-loader" aria-live="polite" aria-busy="true">
+      <div class="app-loader-card">
+        <img
+          class="app-loader-icon"
+          src="/AppPlasa/android-chrome-192x192.png"
+          alt=""
+          width="64"
+          height="64"
+        />
+        <p class="app-loader-title">Abrasito</p>
+        <div class="app-loader-bar" aria-hidden="true">
+          <div id="appLoaderProgress" class="app-loader-bar-fill"></div>
+        </div>
+        <p id="appLoaderStatus" class="app-loader-status">Preparando tu rinconcito…</p>
       </div>
     </div>
     <div
@@ -3640,24 +3648,37 @@
           .subscribe();
       }
 
-      const PWA_DISMISS_KEY = "pwaInstallDismissed";
-      const PWA_IMAGE_ASSETS = [
+      const APP_IMAGE_ASSETS = [
         "./Yo.jpg",
         "./Key.jpg",
         "./tabboard-corcho.jpg",
         "./Florkyflor.png",
       ];
-      let deferredPwaInstall = null;
-      const pwaInstallEl = document.getElementById("pwaInstall");
-      const pwaInstallBtn = document.getElementById("pwaInstallBtn");
-      const pwaInstallDismiss = document.getElementById("pwaInstallDismiss");
-      const pwaInstallHint = document.getElementById("pwaInstallHint");
+      const appLoader = document.getElementById("appLoader");
+      const appLoaderProgress = document.getElementById("appLoaderProgress");
+      const appLoaderStatus = document.getElementById("appLoaderStatus");
 
-      function isStandalonePwa() {
-        return (
-          window.matchMedia("(display-mode: standalone)").matches ||
-          window.navigator.standalone === true
-        );
+      function setAppLoaderProgress(percent, message) {
+        if (appLoaderProgress) {
+          appLoaderProgress.style.width = `${Math.max(0, Math.min(100, percent))}%`;
+        }
+        if (message && appLoaderStatus) appLoaderStatus.textContent = message;
+      }
+
+      function showAppLoader(message = "Cargando…") {
+        if (!appLoader) return;
+        appLoader.classList.remove("hidden");
+        appLoader.setAttribute("aria-busy", "true");
+        setAppLoaderProgress(12, message);
+      }
+
+      function hideAppLoader() {
+        if (!appLoader) return;
+        setAppLoaderProgress(100, "Listo");
+        setTimeout(() => {
+          appLoader.classList.add("hidden");
+          appLoader.setAttribute("aria-busy", "false");
+        }, 320);
       }
 
       function warmImageCache(urls) {
@@ -3674,7 +3695,7 @@
           registration?.waiting ||
           registration?.installing;
         if (sw) {
-          sw.postMessage({ type: "PRECACHE_IMAGES", urls: PWA_IMAGE_ASSETS });
+          sw.postMessage({ type: "PRECACHE_IMAGES", urls: APP_IMAGE_ASSETS });
         }
       }
 
@@ -3684,7 +3705,7 @@
           const registration = await navigator.serviceWorker.register("./sw.js", {
             scope: "./",
           });
-          warmImageCache(PWA_IMAGE_ASSETS);
+          warmImageCache(APP_IMAGE_ASSETS);
           if (registration.active) {
             requestSwImagePrecache(registration);
           } else {
@@ -3699,77 +3720,58 @@
           }
           return registration;
         } catch (_) {
-          warmImageCache(PWA_IMAGE_ASSETS);
+          warmImageCache(APP_IMAGE_ASSETS);
           return null;
         }
       }
 
-      function showPwaInstallBanner() {
-        if (!pwaInstallEl || isStandalonePwa()) return;
-        if (localStorage.getItem(PWA_DISMISS_KEY) === "1") return;
-        const isIos =
-          /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
-        if (isIos && pwaInstallHint) {
-          pwaInstallHint.textContent =
-            "En Safari: Compartir → Añadir a pantalla de inicio.";
-          if (pwaInstallBtn) pwaInstallBtn.textContent = "Entendido";
-        }
-        pwaInstallEl.classList.add("show");
+      async function preloadAppImages() {
+        const total = APP_IMAGE_ASSETS.length;
+        if (!total) return;
+        let done = 0;
+        await Promise.all(
+          APP_IMAGE_ASSETS.map(
+            (url) =>
+              new Promise((resolve) => {
+                const img = new Image();
+                const finish = () => {
+                  done += 1;
+                  const pct = 55 + Math.round((done / total) * 35);
+                  setAppLoaderProgress(
+                    pct,
+                    `Cargando imágenes (${done}/${total})…`
+                  );
+                  resolve();
+                };
+                img.onload = finish;
+                img.onerror = finish;
+                img.src = url;
+              })
+          )
+        );
       }
-
-      function hidePwaInstallBanner(rememberDismiss = false) {
-        if (rememberDismiss) localStorage.setItem(PWA_DISMISS_KEY, "1");
-        pwaInstallEl?.classList.remove("show");
-      }
-
-      window.addEventListener("beforeinstallprompt", (event) => {
-        event.preventDefault();
-        deferredPwaInstall = event;
-        showPwaInstallBanner();
-      });
-
-      pwaInstallBtn?.addEventListener("click", async () => {
-        const isIos =
-          /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
-        if (isIos) {
-          hidePwaInstallBanner(true);
-          return;
-        }
-        if (!deferredPwaInstall) {
-          hidePwaInstallBanner(true);
-          return;
-        }
-        deferredPwaInstall.prompt();
-        await deferredPwaInstall.userChoice.catch(() => ({}));
-        deferredPwaInstall = null;
-        hidePwaInstallBanner(true);
-      });
-
-      pwaInstallDismiss?.addEventListener("click", () => {
-        hidePwaInstallBanner(true);
-      });
-
-      window.addEventListener("appinstalled", () => {
-        hidePwaInstallBanner(true);
-        showStatus("App instalada en el móvil 💜");
-      });
 
       document.addEventListener("visibilitychange", () => {
         if (!document.hidden) checkPendingNeedNotifications();
       });
 
       (async () => {
+        showAppLoader("Preparando tu rinconcito…");
+        setAppLoaderProgress(8, "Activando caché…");
         await registerAppServiceWorker();
+        setAppLoaderProgress(22, "Conectando con Supabase…");
         await detectReadReceiptsSupport();
         await detectBombonesSchemaSupport();
+        setAppLoaderProgress(38, "Cargando películas y planes…");
         await loadMovies();
         await loadPlans();
+        setAppLoaderProgress(48, "Sincronizando ánimo…");
         await loadMood();
         subscribeRealtime();
+        setAppLoaderProgress(52, "Comprobando avisos…");
         await checkPendingNeedNotifications();
-        if (!isStandalonePwa() && !deferredPwaInstall) {
-          setTimeout(showPwaInstallBanner, 2200);
-        }
+        await preloadAppImages();
+        hideAppLoader();
       })();
 
       function formatRemaining(ms) {
@@ -3797,6 +3799,8 @@
         closePlanMenu();
         closeBombones();
         abrasitoArea.classList.add("show");
+        showAppLoader("Abriendo pensamientos…");
+        setAppLoaderProgress(20, "Cargando conversación…");
 
         countdownValue.textContent = formatRemaining(
           COUNTDOWN_TARGET - Date.now()
@@ -3816,6 +3820,14 @@
         // Lazy load: el chat sólo se carga cuando se entra al modo Abrasito.
         await loadThoughts();
         markThoughtsAsSeenByOther();
+        const florkImg = document.getElementById("flork");
+        if (florkImg && !florkImg.complete) {
+          await new Promise((resolve) => {
+            florkImg.addEventListener("load", resolve, { once: true });
+            florkImg.addEventListener("error", resolve, { once: true });
+          });
+        }
+        hideAppLoader();
       });
     </script>
   </body>
