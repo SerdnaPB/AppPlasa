@@ -3,8 +3,13 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="theme-color" content="#0b1220" />
+    <meta name="theme-color" content="#2d1b4e" />
     <meta name="application-name" content="Abrasito" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="preload" href="./Yo.jpg" as="image" />
+    <link rel="preload" href="./Key.jpg" as="image" />
+    <link rel="preload" href="./tabboard-corcho.jpg" as="image" />
+    <link rel="preload" href="./Florkyflor.png" as="image" />
     <link rel="icon" type="image/x-icon" href="/AppPlasa/favicon.ico" />
     <link rel="shortcut icon" href="/AppPlasa/favicon.ico" />
     <link rel="icon" type="image/png" sizes="16x16" href="/AppPlasa/favicon-16x16.png" />
@@ -13,14 +18,25 @@
     <link rel="icon" type="image/png" sizes="512x512" href="/AppPlasa/android-chrome-512x512.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/AppPlasa/apple-touch-icon.png" />
     <link rel="apple-touch-icon-precomposed" href="/AppPlasa/apple-touch-icon.png" />
-    <meta name="msapplication-TileColor" content="#0b1220" />
+    <meta name="msapplication-TileColor" content="#2d1b4e" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Abrasito" />
     <meta name="msapplication-TileImage" content="/AppPlasa/android-chrome-192x192.png" />
     <meta property="og:image" content="/AppPlasa/android-chrome-512x512.png" />
     <title>Nuestro pequeño rinconcito de desahogo</title>
     <style>
       :root {
-        color-scheme: light dark;
-        --mood-hue: 220;
+        color-scheme: dark;
+        /* Paleta “lavender rosewater”: crema, rosa pastel, lavanda, ciruela */
+        --mood-hue: 285;
+        --plum-deep: #1a0f2e;
+        --plum-mid: #2d1b4e;
+        --lavender: #c4b5fd;
+        --rose-soft: #f8b7c2;
+        --rose-accent: #e879a9;
+        --cream: #fff8e7;
+        --text-on-dark: #f8f4ff;
       }
       body {
         margin: 0;
@@ -29,11 +45,18 @@
         place-items: center;
         font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial,
           "Apple Color Emoji", "Segoe UI Emoji";
+        color: var(--text-on-dark);
         background: radial-gradient(
-          1200px 800px at 50% 25%,
-          hsl(var(--mood-hue) 35% 18%),
-          hsl(var(--mood-hue) 50% 6%)
-        );
+            1100px 720px at 50% 12%,
+            hsl(var(--mood-hue) 48% 32%),
+            transparent 70%
+          ),
+          radial-gradient(
+            900px 600px at 80% 90%,
+            rgba(248, 183, 194, 0.12),
+            transparent 65%
+          ),
+          linear-gradient(165deg, var(--plum-mid) 0%, var(--plum-deep) 55%, #120818 100%);
         transition: background 700ms ease;
       }
       .wrap {
@@ -51,9 +74,15 @@
         border: 0;
         border-radius: 24px;
         cursor: pointer;
-        background: linear-gradient(135deg, #86efac, #4ade80);
-        color: #111827;
-        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+        background: linear-gradient(
+          135deg,
+          #fff1f5 0%,
+          var(--rose-soft) 42%,
+          var(--rose-accent) 100%
+        );
+        color: #4a1942;
+        box-shadow: 0 16px 42px rgba(232, 121, 169, 0.42),
+          inset 0 1px 0 rgba(255, 255, 255, 0.45);
         transition: transform 120ms ease, filter 120ms ease;
       }
       #btn:active {
@@ -70,9 +99,9 @@
         font-size: 20px;
         font-weight: 800;
         cursor: pointer;
-        background: rgba(125, 211, 252, 0.95);
-        color: #082f49;
-        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
+        background: linear-gradient(135deg, #ede9fe, var(--lavender));
+        color: #3b0764;
+        box-shadow: 0 10px 28px rgba(124, 58, 237, 0.35);
       }
       .menu-toggle-left {
         left: 16px;
@@ -305,14 +334,14 @@
         padding: 14px 16px;
         background: linear-gradient(
           135deg,
-          rgba(125, 211, 252, 0.22),
-          rgba(167, 139, 250, 0.28)
+          rgba(248, 183, 194, 0.22),
+          rgba(196, 181, 253, 0.32)
         );
-        border: 1px solid rgba(167, 139, 250, 0.55);
-        color: #f5f3ff;
+        border: 1px solid rgba(248, 183, 194, 0.45);
+        color: #faf5ff;
         text-align: center;
-        box-shadow: 0 14px 36px rgba(124, 58, 237, 0.25),
-          inset 0 1px 0 rgba(255, 255, 255, 0.18);
+        box-shadow: 0 14px 36px rgba(124, 58, 237, 0.28),
+          inset 0 1px 0 rgba(255, 255, 255, 0.2);
       }
       .mood-title {
         margin: 0 0 10px;
@@ -402,9 +431,9 @@
         font-size: clamp(16px, 3vw, 22px);
         font-weight: 800;
         cursor: pointer;
-        background: linear-gradient(135deg, #ef4444, #b91c1c);
-        color: #fff7ed;
-        box-shadow: 0 14px 34px rgba(220, 38, 38, 0.45);
+        background: linear-gradient(135deg, #fb7185, #e11d48);
+        color: #fff1f2;
+        box-shadow: 0 14px 34px rgba(225, 29, 72, 0.4);
         transition: transform 120ms ease, filter 120ms ease;
       }
       .notify-btn:active {
@@ -419,9 +448,9 @@
         font-size: clamp(16px, 3vw, 22px);
         font-weight: 900;
         cursor: pointer;
-        background: linear-gradient(135deg, #2dd4bf, #67e8f9);
-        color: #042f2e;
-        box-shadow: 0 14px 34px rgba(20, 184, 166, 0.35);
+        background: linear-gradient(135deg, #b6e2d3, #86efac);
+        color: #14532d;
+        box-shadow: 0 14px 34px rgba(34, 197, 94, 0.32);
         transition: transform 120ms ease, filter 120ms ease;
       }
       .bombones-btn:active {
@@ -436,9 +465,9 @@
         font-size: clamp(16px, 3vw, 22px);
         font-weight: 800;
         cursor: pointer;
-        background: linear-gradient(135deg, #93c5fd, #60a5fa);
-        color: #0c4a6e;
-        box-shadow: 0 14px 34px rgba(37, 99, 235, 0.35);
+        background: linear-gradient(135deg, #ddd6fe, #a78bfa);
+        color: #3b0764;
+        box-shadow: 0 14px 34px rgba(139, 92, 246, 0.35);
         transition: transform 120ms ease, filter 120ms ease;
       }
       .flights-btn:active {
@@ -1320,6 +1349,80 @@
           max-width: 200px;
         }
       }
+      .pwa-install {
+        position: fixed;
+        left: 50%;
+        bottom: 16px;
+        transform: translateX(-50%);
+        z-index: 70;
+        width: min(520px, 94vw);
+        display: none;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 14px;
+        border-radius: 18px;
+        background: linear-gradient(
+          135deg,
+          rgba(45, 27, 78, 0.97),
+          rgba(26, 15, 46, 0.98)
+        );
+        border: 1px solid rgba(248, 183, 194, 0.45);
+        box-shadow: 0 18px 48px rgba(0, 0, 0, 0.45);
+        color: var(--text-on-dark);
+      }
+      .pwa-install.show {
+        display: flex;
+      }
+      .pwa-install-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        flex-shrink: 0;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+      }
+      .pwa-install-copy {
+        flex: 1;
+        min-width: 0;
+      }
+      .pwa-install-copy strong {
+        display: block;
+        font-size: 14px;
+        margin-bottom: 2px;
+      }
+      .pwa-install-copy span {
+        display: block;
+        font-size: 11px;
+        opacity: 0.88;
+        line-height: 1.3;
+      }
+      .pwa-install-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        flex-shrink: 0;
+      }
+      .pwa-install-primary {
+        border: 0;
+        border-radius: 999px;
+        padding: 8px 14px;
+        font-weight: 800;
+        font-size: 12px;
+        cursor: pointer;
+        background: linear-gradient(135deg, var(--rose-soft), var(--rose-accent));
+        color: #4a1942;
+        font-family: inherit;
+      }
+      .pwa-install-dismiss {
+        border: 0;
+        border-radius: 999px;
+        padding: 6px 10px;
+        font-weight: 700;
+        font-size: 11px;
+        cursor: pointer;
+        background: rgba(255, 255, 255, 0.1);
+        color: #ede9fe;
+        font-family: inherit;
+      }
     </style>
   </head>
   <body>
@@ -1343,6 +1446,30 @@
     <div id="planBackdrop" class="menu-backdrop"></div>
     <div id="connStatusBadge" class="conn-pill" aria-live="polite">Desconectado</div>
     <div id="syncStatus" class="sync-status"></div>
+    <div id="pwaInstall" class="pwa-install" role="dialog" aria-label="Instalar app">
+      <img
+        id="pwaInstallIcon"
+        class="pwa-install-icon"
+        src="/AppPlasa/android-chrome-192x192.png"
+        alt=""
+        width="48"
+        height="48"
+      />
+      <div class="pwa-install-copy">
+        <strong>Instalar Abrasito</strong>
+        <span id="pwaInstallHint"
+          >En el móvil: icono en la pantalla de inicio y fotos precargadas.</span
+        >
+      </div>
+      <div class="pwa-install-actions">
+        <button id="pwaInstallBtn" class="pwa-install-primary" type="button">
+          Instalar
+        </button>
+        <button id="pwaInstallDismiss" class="pwa-install-dismiss" type="button">
+          Ahora no
+        </button>
+      </div>
+    </div>
     <div
       id="needAlert"
       class="need-alert"
@@ -1635,8 +1762,8 @@
       const NOTIFY_COOLDOWN_MS = 5000;
       const SEEN_NOTIFICATIONS_KEY = "seenNotificationIds";
 
-      // Fecha objetivo del countdown: 21 de mayo de 2026 a las 22:00 (hora local).
-      const COUNTDOWN_TARGET = new Date(2026, 4, 21, 22, 0, 0, 0).getTime();
+      // Fecha objetivo del countdown: jueves 4 de junio de 2026 a las 14:30 (hora local).
+      const COUNTDOWN_TARGET = new Date(2026, 5, 4, 14, 30, 0, 0).getTime();
 
       let movies = [];
       let thoughts = [];
@@ -3513,21 +3640,126 @@
           .subscribe();
       }
 
-      function unregisterServiceWorkers() {
-        if (!("serviceWorker" in navigator)) return;
-        navigator.serviceWorker
-          .getRegistrations()
-          .then((registrations) => {
-            registrations.forEach((registration) => registration.unregister());
-          })
-          .catch(() => {});
+      const PWA_DISMISS_KEY = "pwaInstallDismissed";
+      const PWA_IMAGE_ASSETS = [
+        "./Yo.jpg",
+        "./Key.jpg",
+        "./tabboard-corcho.jpg",
+        "./Florkyflor.png",
+      ];
+      let deferredPwaInstall = null;
+      const pwaInstallEl = document.getElementById("pwaInstall");
+      const pwaInstallBtn = document.getElementById("pwaInstallBtn");
+      const pwaInstallDismiss = document.getElementById("pwaInstallDismiss");
+      const pwaInstallHint = document.getElementById("pwaInstallHint");
+
+      function isStandalonePwa() {
+        return (
+          window.matchMedia("(display-mode: standalone)").matches ||
+          window.navigator.standalone === true
+        );
       }
+
+      function warmImageCache(urls) {
+        urls.forEach((url) => {
+          const img = new Image();
+          img.decoding = "async";
+          img.src = url;
+        });
+      }
+
+      function requestSwImagePrecache(registration) {
+        const sw =
+          registration?.active ||
+          registration?.waiting ||
+          registration?.installing;
+        if (sw) {
+          sw.postMessage({ type: "PRECACHE_IMAGES", urls: PWA_IMAGE_ASSETS });
+        }
+      }
+
+      async function registerAppServiceWorker() {
+        if (!("serviceWorker" in navigator)) return null;
+        try {
+          const registration = await navigator.serviceWorker.register("./sw.js", {
+            scope: "./",
+          });
+          warmImageCache(PWA_IMAGE_ASSETS);
+          if (registration.active) {
+            requestSwImagePrecache(registration);
+          } else {
+            registration.addEventListener("updatefound", () => {
+              const worker = registration.installing;
+              worker?.addEventListener("statechange", () => {
+                if (worker.state === "activated") {
+                  requestSwImagePrecache(registration);
+                }
+              });
+            });
+          }
+          return registration;
+        } catch (_) {
+          warmImageCache(PWA_IMAGE_ASSETS);
+          return null;
+        }
+      }
+
+      function showPwaInstallBanner() {
+        if (!pwaInstallEl || isStandalonePwa()) return;
+        if (localStorage.getItem(PWA_DISMISS_KEY) === "1") return;
+        const isIos =
+          /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
+        if (isIos && pwaInstallHint) {
+          pwaInstallHint.textContent =
+            "En Safari: Compartir → Añadir a pantalla de inicio.";
+          if (pwaInstallBtn) pwaInstallBtn.textContent = "Entendido";
+        }
+        pwaInstallEl.classList.add("show");
+      }
+
+      function hidePwaInstallBanner(rememberDismiss = false) {
+        if (rememberDismiss) localStorage.setItem(PWA_DISMISS_KEY, "1");
+        pwaInstallEl?.classList.remove("show");
+      }
+
+      window.addEventListener("beforeinstallprompt", (event) => {
+        event.preventDefault();
+        deferredPwaInstall = event;
+        showPwaInstallBanner();
+      });
+
+      pwaInstallBtn?.addEventListener("click", async () => {
+        const isIos =
+          /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
+        if (isIos) {
+          hidePwaInstallBanner(true);
+          return;
+        }
+        if (!deferredPwaInstall) {
+          hidePwaInstallBanner(true);
+          return;
+        }
+        deferredPwaInstall.prompt();
+        await deferredPwaInstall.userChoice.catch(() => ({}));
+        deferredPwaInstall = null;
+        hidePwaInstallBanner(true);
+      });
+
+      pwaInstallDismiss?.addEventListener("click", () => {
+        hidePwaInstallBanner(true);
+      });
+
+      window.addEventListener("appinstalled", () => {
+        hidePwaInstallBanner(true);
+        showStatus("App instalada en el móvil 💜");
+      });
 
       document.addEventListener("visibilitychange", () => {
         if (!document.hidden) checkPendingNeedNotifications();
       });
 
       (async () => {
+        await registerAppServiceWorker();
         await detectReadReceiptsSupport();
         await detectBombonesSchemaSupport();
         await loadMovies();
@@ -3535,7 +3767,9 @@
         await loadMood();
         subscribeRealtime();
         await checkPendingNeedNotifications();
-        unregisterServiceWorkers();
+        if (!isStandalonePwa() && !deferredPwaInstall) {
+          setTimeout(showPwaInstallBanner, 2200);
+        }
       })();
 
       function formatRemaining(ms) {
