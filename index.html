@@ -109,6 +109,30 @@
       .menu-toggle-right {
         right: 16px;
       }
+      .abrasito-back-btn {
+        position: fixed;
+        top: 16px;
+        right: 16px;
+        z-index: 32;
+        display: none;
+        border: 0;
+        border-radius: 12px;
+        padding: 10px 14px;
+        font-size: 15px;
+        font-weight: 800;
+        cursor: pointer;
+        background: linear-gradient(135deg, #fff1f5, var(--rose-soft));
+        color: #831843;
+        box-shadow: 0 10px 28px rgba(232, 121, 169, 0.4);
+      }
+      .abrasito-back-btn.show {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+      }
+      .abrasito-back-btn:active {
+        transform: translateY(1px);
+      }
       .menu-backdrop {
         position: fixed;
         inset: 0;
@@ -1458,6 +1482,14 @@
     >
       📅
     </button>
+    <button
+      id="abrasitoBackBtn"
+      class="abrasito-back-btn"
+      type="button"
+      aria-label="Volver al inicio"
+    >
+      ← Inicio
+    </button>
     <div id="menuBackdrop" class="menu-backdrop"></div>
     <div id="planBackdrop" class="menu-backdrop"></div>
     <div id="connStatusBadge" class="conn-pill" aria-live="polite">Desconectado</div>
@@ -1747,6 +1779,7 @@
         "bombonesFoldersBackdrop"
       );
       const abrasitoArea = document.getElementById("abrasitoArea");
+      const abrasitoBackBtn = document.getElementById("abrasitoBackBtn");
       const syncStatus = document.getElementById("syncStatus");
       const connBadge = document.getElementById("connStatusBadge");
       let countdownTimer = null;
@@ -3786,7 +3819,23 @@
         ).padStart(2, "0")}m ${String(seconds).padStart(2, "0")}s`;
       }
 
-      btn.addEventListener("click", async () => {
+      function showMainHome() {
+        abrasitoArea.classList.remove("show");
+        if (abrasitoBackBtn) abrasitoBackBtn.classList.remove("show");
+        btn.style.display = "";
+        moodCard.style.display = "";
+        notifyBtn.style.display = "";
+        if (bombonesBtn) bombonesBtn.style.display = "";
+        if (flightsBtn) flightsBtn.style.display = "";
+        menuToggle.style.display = "";
+        planToggle.style.display = "";
+        if (countdownTimer) {
+          clearInterval(countdownTimer);
+          countdownTimer = null;
+        }
+      }
+
+      async function enterAbrasitoMode() {
         btn.style.display = "none";
         moodCard.style.display = "none";
         notifyBtn.style.display = "none";
@@ -3799,6 +3848,7 @@
         closePlanMenu();
         closeBombones();
         abrasitoArea.classList.add("show");
+        if (abrasitoBackBtn) abrasitoBackBtn.classList.add("show");
         showAppLoader("Abriendo pensamientos…");
         setAppLoaderProgress(20, "Cargando conversación…");
 
@@ -3828,7 +3878,17 @@
           });
         }
         hideAppLoader();
+      }
+
+      btn.addEventListener("click", () => {
+        enterAbrasitoMode();
       });
+
+      if (abrasitoBackBtn) {
+        abrasitoBackBtn.addEventListener("click", () => {
+          showMainHome();
+        });
+      }
     </script>
   </body>
 </html>
