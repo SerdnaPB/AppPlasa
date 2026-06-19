@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="theme-color" content="#2d1b4e" />
-    <meta name="application-name" content="Abrasito" />
+    <meta name="application-name" content="C&amp;A" />
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="preload" href="./Yo.jpg" as="image" />
     <link rel="preload" href="./Key.jpg" as="image" />
@@ -21,7 +21,7 @@
     <meta name="msapplication-TileColor" content="#2d1b4e" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="Abrasito" />
+    <meta name="apple-mobile-web-app-title" content="C&amp;A" />
     <meta name="msapplication-TileImage" content="/AppPlasa/android-chrome-192x192.png" />
     <meta property="og:image" content="/AppPlasa/android-chrome-512x512.png" />
     <title>Nuestro pequeño rinconcito de desahogo</title>
@@ -615,6 +615,128 @@
         cursor: pointer;
         background: rgba(15, 23, 42, 0.35);
         color: #e0f2fe;
+      }
+      .rag-btn {
+        width: min(560px, 92vw);
+        border: 0;
+        border-radius: 16px;
+        padding: 14px 18px;
+        font-size: clamp(16px, 3vw, 22px);
+        font-weight: 800;
+        cursor: pointer;
+        background: linear-gradient(135deg, #fde68a, #f472b6);
+        color: #581c87;
+        box-shadow: 0 14px 34px rgba(244, 114, 182, 0.35);
+        transition: transform 120ms ease, filter 120ms ease;
+      }
+      .rag-btn:active {
+        transform: translateY(1px) scale(0.99);
+        filter: brightness(0.96);
+      }
+      .rag-panel {
+        width: min(560px, 92vw);
+        display: none;
+        border-radius: 18px;
+        padding: 14px 16px;
+        background: linear-gradient(
+          145deg,
+          rgba(253, 230, 138, 0.22),
+          rgba(244, 114, 182, 0.28) 55%,
+          rgba(45, 27, 78, 0.55)
+        );
+        border: 1px solid rgba(244, 114, 182, 0.55);
+        color: #fdf4ff;
+        box-sizing: border-box;
+        box-shadow: 0 14px 36px rgba(124, 58, 237, 0.28);
+        gap: 10px;
+      }
+      .rag-panel.open {
+        display: grid;
+      }
+      .rag-panel h3 {
+        margin: 0;
+        font-size: clamp(16px, 3vw, 22px);
+        font-weight: 800;
+        color: #fce7f3;
+      }
+      .rag-panel-hint {
+        margin: 0;
+        font-size: 12px;
+        line-height: 1.35;
+        color: rgba(253, 244, 255, 0.9);
+      }
+      .rag-status {
+        margin: 0;
+        font-size: 12px;
+        color: #fbcfe8;
+      }
+      .rag-status[data-error="1"] {
+        color: #fecaca;
+      }
+      .rag-messages {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        max-height: 34vh;
+        overflow-y: auto;
+        padding: 4px 2px;
+      }
+      .rag-msg {
+        max-width: 92%;
+        padding: 9px 12px;
+        border-radius: 14px;
+        line-height: 1.4;
+        font-size: 14px;
+        word-break: break-word;
+        white-space: pre-wrap;
+      }
+      .rag-msg-user {
+        align-self: flex-end;
+        background: linear-gradient(135deg, #fce7f3, var(--rose-soft));
+        color: #4a1942;
+      }
+      .rag-msg-assistant {
+        align-self: flex-start;
+        background: rgba(15, 23, 42, 0.45);
+        border: 1px solid rgba(196, 181, 253, 0.35);
+        color: #faf5ff;
+      }
+      .rag-msg-system {
+        align-self: center;
+        font-size: 12px;
+        background: rgba(124, 58, 237, 0.25);
+        color: #ede9fe;
+      }
+      .rag-ask-row {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 8px;
+      }
+      .rag-ask-row textarea {
+        border: 1px solid rgba(244, 114, 182, 0.5);
+        border-radius: 12px;
+        padding: 10px 12px;
+        background: rgba(255, 248, 231, 0.92);
+        color: #4a1942;
+        resize: vertical;
+        min-height: 52px;
+        font-family: inherit;
+      }
+      .rag-ask-btn,
+      .rag-close-btn {
+        border: 0;
+        border-radius: 10px;
+        padding: 10px 12px;
+        font-weight: 800;
+        cursor: pointer;
+      }
+      .rag-ask-btn {
+        background: linear-gradient(135deg, var(--rose-soft), var(--rose-accent));
+        color: #4a1942;
+      }
+      .rag-close-btn {
+        background: rgba(15, 23, 42, 0.4);
+        color: #fdf4ff;
       }
       .bombones-view {
         position: fixed;
@@ -1503,7 +1625,7 @@
           width="64"
           height="64"
         />
-        <p class="app-loader-title">Abrasito</p>
+        <p class="app-loader-title">C&amp;A</p>
         <div class="app-loader-bar" aria-hidden="true">
           <div id="appLoaderProgress" class="app-loader-bar-fill"></div>
         </div>
@@ -1667,6 +1789,7 @@
         La cajita de bombones 🍫
       </button>
       <button id="flightsBtn" class="flights-btn" type="button">Vuelos ✈️</button>
+      <button id="ragBtn" class="rag-btn" type="button">Pregúnta de los bombonchines💬</button>
       <section id="flightsPanel" class="flights-panel" aria-label="Buscar vuelos">
         <h3>Vuelos de fin de semana</h3>
         <p class="flights-panel-hint">
@@ -1696,6 +1819,24 @@
           Cerrar
         </button>
       </section>
+      <section id="ragPanel" class="rag-panel" aria-label="Preguntar sobre Claudia">
+        <h3>Memoria del chat</h3>
+        <p class="rag-panel-hint">
+          Pregunta sobre Claudia usando el chat indexado en Supabase. La búsqueda
+          corre en tu dispositivo; Gemini solo redacta la respuesta.
+        </p>
+        <p id="ragStatus" class="rag-status">Escribe una pregunta sobre Claudia.</p>
+        <div id="ragMessages" class="rag-messages" aria-live="polite"></div>
+        <div class="rag-ask-row">
+          <textarea
+            id="ragQuestion"
+            placeholder="Ej. ¿Con quién quedó el 19 de junio?"
+            maxlength="500"
+          ></textarea>
+          <button id="ragAskBtn" class="rag-ask-btn" type="button">Preguntar</button>
+        </div>
+        <button id="ragCloseBtn" class="rag-close-btn" type="button">Cerrar</button>
+      </section>
       <div id="abrasitoArea" class="abrasito-area">
         <div id="countdown" class="countdown">
           <p class="countdown-title">Tiempo para vernos (como máx)</p>
@@ -1723,6 +1864,8 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="./rag-config.js"></script>
+    <script src="./rag-ask.js"></script>
     <script>
       const btn = document.getElementById("btn");
       const countdown = document.getElementById("countdown");
@@ -1754,6 +1897,9 @@
       const needAlertDismiss = document.getElementById("needAlertDismiss");
       const bombonesBtn = document.getElementById("bombonesBtn");
       const flightsBtn = document.getElementById("flightsBtn");
+      const ragBtn = document.getElementById("ragBtn");
+      const ragPanel = document.getElementById("ragPanel");
+      const ragCloseBtn = document.getElementById("ragCloseBtn");
       const flightsPanel = document.getElementById("flightsPanel");
       const flightsResults = document.getElementById("flightsResults");
       const flightsCloseBtn = document.getElementById("flightsCloseBtn");
@@ -2764,7 +2910,17 @@
         flightsPanel?.classList.remove("open");
       }
 
+      function openRagPanel() {
+        closeFlightsPanel();
+        ragPanel?.classList.add("open");
+      }
+
+      function closeRagPanel() {
+        ragPanel?.classList.remove("open");
+      }
+
       flightsBtn?.addEventListener("click", () => {
+        closeRagPanel();
         if (flightsPanel?.classList.contains("open")) {
           closeFlightsPanel();
         } else {
@@ -2772,6 +2928,26 @@
         }
       });
       flightsCloseBtn?.addEventListener("click", closeFlightsPanel);
+
+      ragBtn?.addEventListener("click", () => {
+        closeFlightsPanel();
+        if (ragPanel?.classList.contains("open")) {
+          closeRagPanel();
+        } else {
+          openRagPanel();
+        }
+      });
+      ragCloseBtn?.addEventListener("click", closeRagPanel);
+
+      if (window.RagAsk) {
+        const ragCfg = window.RAG_CONFIG || {};
+        window.RagAsk.initUi(ragPanel, {
+          supabaseClient,
+          partnerName: ragCfg.partnerName || "Claudia",
+          myName: ragCfg.myName || "Andres",
+          geminiModel: ragCfg.geminiModel || "gemini-3.1-flash-lite",
+        });
+      }
       flightsRouteBcnSvq?.addEventListener("click", () =>
         setActiveFlightsRoute("bcn-svq")
       );
@@ -3827,6 +4003,8 @@
         notifyBtn.style.display = "";
         if (bombonesBtn) bombonesBtn.style.display = "";
         if (flightsBtn) flightsBtn.style.display = "";
+        if (ragBtn) ragBtn.style.display = "";
+        closeRagPanel();
         menuToggle.style.display = "";
         planToggle.style.display = "";
         if (countdownTimer) {
@@ -3841,7 +4019,9 @@
         notifyBtn.style.display = "none";
         if (bombonesBtn) bombonesBtn.style.display = "none";
         if (flightsBtn) flightsBtn.style.display = "none";
+        if (ragBtn) ragBtn.style.display = "none";
         closeFlightsPanel();
+        closeRagPanel();
         menuToggle.style.display = "none";
         planToggle.style.display = "none";
         closeMovieMenu();
