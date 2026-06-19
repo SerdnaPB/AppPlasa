@@ -1,0 +1,21 @@
+# Secrets
+.env
+rag-config.js
+
+# Private chat data (never commit)
+output/
+*.jsonl
+Chat de WhatsApp*.txt
+*_clean.jsonl
+*_embedded.jsonl
+*_chunks.jsonl
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# OS / editor
+.DS_Store
+Thumbs.db
